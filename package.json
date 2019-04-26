@@ -1,0 +1,26 @@
+{
+  "name": "nodejsplaid",
+  "version": "1.0.0",
+  "description": "NodeJS plaid web app demo ",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/devferlara/NodeJSBank.git"
+  },
+  "author": "Diego Lara",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/devferlara/NodeJSBank/issues"
+  },
+  "homepage": "https://github.com/devferlara/NodeJSBank#readme",
+  "dependencies": {
+    "express": "^4.16.4",
+    "express-session": "^1.16.1",
+    "helmet": "^3.16.0",
+    "nodemon": "^1.18.11"
+  }
+}
