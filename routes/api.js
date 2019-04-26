@@ -15,6 +15,9 @@ api.get('/login', function (req, res) {
 
 	console.log(req.session.user);
 
+	res.render('signup');
+
+	/*
 	if (req.session.user) {
 		res.status(200).send(
 			{
@@ -27,15 +30,11 @@ api.get('/login', function (req, res) {
 		req.session.user = { usuario: "diego lara" };
 		res.status(400).send(
 			{
-				status: 'no esta logueado'
+				status: 'no esta logueado' 
 			}
 		);
 	}
-
-	
-
-	
-
+	*/
 });
 
 

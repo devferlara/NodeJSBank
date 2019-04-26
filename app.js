@@ -8,6 +8,7 @@ var app = express();
 
 app.use(helmet());
 app.use('/static', express.static('public'));
+app.set('view engine', 'ejs');
 
 app.set('trust proxy', 1);
 

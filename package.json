@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/devferlara/NodeJSBank#readme",
   "dependencies": {
+    "ejs": "^2.6.1",
     "express": "^4.16.4",
     "express-session": "^1.16.1",
     "helmet": "^3.16.0",
