@@ -38,4 +38,9 @@ api.get('/login', function (req, res) {
 });
 
 
+api.get('/register', function (req, res) {
+	res.render('register');
+});
+
+
 module.exports = api;
