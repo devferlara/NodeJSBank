@@ -102,44 +102,48 @@ api.get('/accounts', function (req, res) {
 			.then(data => {
 
 				var accounts = [];
+				console.log(data.length);
+				for (var i = 0; i < data.length; i++) {
+					console.log("Acces token " + data[i]["ACCESS_TOKEN"]);
+					client.getItem(data[i]["ACCESS_TOKEN"], function (error, itemResponse) {
 
-				client.getItem(data[0]["ACCESS_TOKEN"], function (error, itemResponse) {
-
-					if (error != null) {
-						prettyPrintResponse(error);
-						return response.json({
-							error: error
-						});
-					}
-
-					client.getInstitutionById(itemResponse.item.institution_id, { include_display_data: true }, function (err, instRes) {
-						if (err != null) {
-							var msg = 'Unable to pull institution information from the Plaid API.';
-							console.log(msg + '\n' + JSON.stringify(error));
+						if (error != null) {
+							prettyPrintResponse(error);
 							return response.json({
-								error: msg
+								error: error
 							});
-						} else {
-							//console.log(instRes);
-							accounts.push({
-								bank: instRes.institution.name,
-								created: new Date(data[0]["CREATED_AT"]).toLocaleString(),
-								account_id: data[0]["ID"]
-							});
-
-							res.render('accounts', {
-								username: req.session.user.username,
-								status: "ok",
-								data: accounts
-							});
-
 						}
+						client.getInstitutionById(itemResponse.item.institution_id, { include_display_data: true }, function (err, instRes) {
+							if (err != null) {
+								var msg = 'Unable to pull institution information from the Plaid API.';
+								console.log(msg + '\n' + JSON.stringify(error));
+								return response.json({
+									error: msg
+								});
+							} else {
+								//console.log(instRes);
+								accounts.push({
+									bank: instRes.institution.name,
+									created: new Date(data[i]["CREATED_AT"]).toLocaleString(),
+									account_id: data[0]["ID"]
+								});
+
+								console.log("iteracion");
+								if (i == (data.length - 1)) {
+									res.render('accounts', {
+										username: req.session.user.username,
+										status: "ok",
+										data: accounts
+									});
+								}
+
+							}
+						});
+
+
 					});
 
-
-				});
-
-
+				}
 
 			})
 			.catch(error => {
