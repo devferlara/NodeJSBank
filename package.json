@@ -23,8 +23,10 @@
     "ejs": "^2.6.1",
     "express": "^4.16.4",
     "express-jwt": "^5.3.1",
+    "express-mysql-session": "^2.1.0",
     "express-session": "^1.16.1",
     "helmet": "^3.16.0",
+    "jsonwebtoken": "^8.5.1",
     "mysql": "^2.17.1",
     "nodemon": "^1.18.11"
   }

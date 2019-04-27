@@ -4,8 +4,18 @@ var express = require('express');
 var session = require('express-session');
 var helmet = require('helmet');
 var bodyParser = require('body-parser');
+var MySQLStore = require('express-mysql-session')(session);
+
+var options = {
+	host: 'adldb.cyv7jndgjtwk.us-east-2.rds.amazonaws.com',
+	port: 3306,
+	user: 'root',
+	password: 'Eda241flop4r3',
+	database: 'Plaid'
+}; 
 
 var app = express();
+var sessionStore = new MySQLStore(options);
 
 app.use(helmet());
 app.use('/static', express.static('public'));
@@ -21,7 +31,9 @@ app.use(
 		{
 			secret: 'Runj37#&$rw3#$+3Ut?fUKaC4up*3@eDR',
 			resave: false,
+			store: sessionStore,
 			saveUninitialized: true,
+			maxAge: Date.now() + 1800,
 			cookie: { secure: false },
 		}
 	)

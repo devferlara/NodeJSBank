@@ -1,16 +1,16 @@
 'use strict'
 
-var express = require('express');
-var mysql = require('mysql');
+const express = require('express');
+const mysql = require('mysql');
 const jwt = require('express-jwt')
+const jwtoken = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
 const myPlaintextPassword = 's0/\/\P4$$w0rD';
 const someOtherPlaintextPassword = 'not_bacon';
-const secret  = { secret: process.env.SECRET || 'd5faecb1ffc339abe44b095aad052069' }
+const secret = { secret: 'd5faecb1ffc339abe44b095aad052069' }
 
 var api = express();
-
 
 /*
 * String definitions
@@ -40,7 +40,7 @@ api.post('/login', function (req, res) {
 	}
 
 	DBQuery(
-		'SELECT ID, FIRST_NAME, EMAIL, PASSWORD FROM USERS WHERE EMAIL = ?',
+		'SELECT ID, FIRST_NAME, LAST_NAME, EMAIL, PASSWORD FROM USERS WHERE EMAIL = ?',
 		[
 			params.email.toUpperCase(),
 		])
@@ -51,8 +51,13 @@ api.post('/login', function (req, res) {
 			} else {
 				bcrypt.compare(params.password, data[0]["PASSWORD"], function (err, result) {
 					if (result) {
-						req.session.user = { id: data[0]["id"], first_name: data[0]["FIRST_NAME"] + " " + data[0]["LAST_NAME"] }
-						res.status(200).send({ token: "123456789" });
+						console.log(data);
+						req.session.user = { id: data[0]["id"], username: data[0]["FIRST_NAME"] + " " + data[0]["LAST_NAME"] }
+						var token = jwtoken.sign({
+							id: data[0]["id"],
+							loggued: true
+						}, secret.secret);
+						res.status(200).send({ token: token });
 					} else {
 						res.status(400).send({ error: _user_password_incorrect });
 					}
@@ -121,10 +126,10 @@ api.post('/signup', function (req, res) {
 
 });
 
-
+/*
 api.post('/data', jwt(secret), (req, res) => {
-	if (req.user.admin) {
-			return res.status(200).send({ status: "ok" })
+	if (req.user.loggued) {
+		return res.status(200).send({ status: "ok" })
 	}
 	res.status(401).send({ message: 'not authorized' })
 })
