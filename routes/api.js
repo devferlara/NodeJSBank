@@ -2,6 +2,7 @@
 
 var express = require('express');
 var mysql = require('mysql');
+const jwt = require('express-jwt')
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
 const myPlaintextPassword = 's0/\/\P4$$w0rD';
@@ -9,19 +10,14 @@ const someOtherPlaintextPassword = 'not_bacon';
 
 var api = express();
 
-var connection = mysql.createConnection({
-	host: 'adldb.cyv7jndgjtwk.us-east-2.rds.amazonaws.com',
-	user: 'root',
-	password: 'Eda241flop4r3',
-	database: 'Plaid'
-});
-
 
 /*
 * String definitions
 */
 var _email_required = 'Email is required';
 var _password_required = 'Password is required';
+var _user_does_not_exists = 'User does not exists';
+var _user_password_incorrect = 'Password incorrect';
 
 /*
 * Login for users
@@ -43,40 +39,30 @@ api.post('/login', function (req, res) {
 	}
 
 	DBQuery(
-		'SELECT ID, FIRST_NAME, EMAIL, PASSWORD FROM USERS WHERE EMAIL = ? AND PASSWORD = ?',
+		'SELECT ID, FIRST_NAME, EMAIL, PASSWORD FROM USERS WHERE EMAIL = ?',
 		[
-			params.email,
-			params.password,
+			params.email.toUpperCase(),
 		])
 		.then(data => {
 
 			if (data.length == 0) {
-
+				res.status(400).send({ error: _user_does_not_exists });
 			} else {
-				
+				bcrypt.compare(params.password, data[0]["PASSWORD"], function (err, result) {
+					if (result) {
+						res.status(200).send({ token: "123456789" });
+					} else {
+						res.status(400).send({ error: _user_password_incorrect });
+					}
+				});
 			}
 
-			console.log(data);
-			/*
-			bcrypt.compare(params.password, hash, function (err, res) {
-				if (res) {
-		
-				}
-				// res == true
-			});
-			*/
-
-			res.status(200).send();
 		})
 		.catch(error => {
 			console.log(error);
-
 			var defaultError = "We're having issues with the database, please try again";
 			res.status(400).send({ "error": defaultError });
-
 		});
-
-	
 
 });
 
@@ -111,8 +97,8 @@ api.post('/signup', function (req, res) {
 				DBQuery(
 					'INSERT INTO USERS (FIRST_NAME, LAST_NAME, EMAIL, PASSWORD) VALUES (?, ?, ?, ?)',
 					[
-						ucfirst(params.first_name),
-						ucfirst(params.last_name),
+						params.first_name.toLowerCase(),
+						params.last_name.toLowerCase(),
 						params.email.toLowerCase(),
 						hash
 					])
@@ -120,25 +106,27 @@ api.post('/signup', function (req, res) {
 						res.status(200).send();
 					})
 					.catch(error => {
-						console.log(error);
-
 						var defaultError = "We're having issues with the database, please try again";
-
 						if (error.errno == 1062) {
 							defaultError = "Email already exists";
 						}
-
 						res.status(400).send({ "error": defaultError });
-
 					});
 			}
 
 		});
 	});
 
-
-
 });
+
+
+app.post('/data', jwt('d5faecb1ffc339abe44b095aad052069'), (req, res) => {
+	if (req.user.admin) {
+			return res.status(200).send(users)
+	}
+	//respuesta para el usuario que no es admin
+	res.status(401).send({ message: 'not authorized' })
+})
 
 /*
 * DBQuery allows to user execute a query directly in the database
@@ -148,6 +136,14 @@ api.post('/signup', function (req, res) {
 * @return promise with result
 */
 function DBQuery(query, fields) {
+
+	var connection = mysql.createConnection({
+		host: 'adldb.cyv7jndgjtwk.us-east-2.rds.amazonaws.com',
+		user: 'root',
+		password: 'Eda241flop4r3',
+		database: 'Plaid'
+	});
+
 	return new Promise((resolve, reject) => {
 		connection.connect();
 		connection.query(query, fields, function (error, results) {
@@ -156,7 +152,6 @@ function DBQuery(query, fields) {
 			} else {
 				resolve(results);
 			}
-			connection.end();
 		});
 	});
 }
@@ -168,7 +163,7 @@ function validateEmail(email) {
 }
 
 function ucfirst(str) {
-	var firstLetter = str.slice(0,1);
+	var firstLetter = str.slice(0, 1);
 	return firstLetter.toUpperCase() + str.substring(1);
 }
 
