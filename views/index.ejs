@@ -31,7 +31,7 @@
 						<% } else { %>
 						ya tengo papu
 						<% } %>
-						
+
 					</div>
 				</div>
 			</div>
@@ -51,7 +51,7 @@
 
 		var products = 'transactions'.split(',');
 		$(".connect").on("click", function ($) {
-			console.log("sdasdas2");
+
 			var handler = Plaid.create({
 				apiVersion: 'v2',
 				clientName: 'Plaid Quickstart',
@@ -60,6 +60,8 @@
 				key: '<%= PLAID_PUBLIC_KEY %>',
 				onSuccess: function (public_token) {
 					console.log(public_token);
+
+					$('body').loading({ stoppable: true });
 
 					axios({
 						method: 'post',
@@ -76,14 +78,14 @@
 							text: "Your account has been added successfully",
 							type: "success",
 							html: true,
-							confirmButtonColor: "#F1E31F",
+							confirmButtonColor: "#145388",
 							confirmButtonText: "Ok",
 						},
-							function (isConfirm) {
-								if (isConfirm) {
-									document.location.reload();
-								}
-							});
+						function (isConfirm) {
+							if (isConfirm) {
+								document.location.reload();
+							}
+						});
 
 					}).catch((error) => {
 						console.log(error)
