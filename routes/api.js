@@ -10,6 +10,12 @@ const myPlaintextPassword = 's0/\/\P4$$w0rD';
 const someOtherPlaintextPassword = 'not_bacon';
 const secret = { secret: 'd5faecb1ffc339abe44b095aad052069' }
 
+const plaid = require('plaid');
+const PLAID_CLIENT_ID = '5c813c380c368f0012c2e8ed';
+const PLAID_SECRET = 'b416a1e08275b0de5251a46f3a5b8c';
+const PLAID_PUBLIC_KEY = '5049c988e7104f6947fa3f78c5760f';
+const PLAID_ENV = 'sandbox';
+
 var api = express();
 
 /*
@@ -19,6 +25,17 @@ var _email_required = 'Email is required';
 var _password_required = 'Password is required';
 var _user_does_not_exists = 'User does not exists';
 var _user_password_incorrect = 'Password incorrect';
+
+/*
+* Plaid credentials
+*/
+var client = new plaid.Client(
+  PLAID_CLIENT_ID,
+  PLAID_SECRET,
+  PLAID_PUBLIC_KEY,
+  plaid.environments[PLAID_ENV],
+  {version: '2018-05-22'}
+);
 
 /*
 * Login for users
@@ -126,12 +143,54 @@ api.post('/signup', function (req, res) {
 
 });
 
+
+api.post('/get_access_token', jwt(secret), (req, res) => {
+
+	if (req.user.loggued) {
+
+		var params = req.body;
+
+		if (!params.public_token) {
+			res.status(400).send({ error: 'Public token is required' });
+		}
+
+		client.exchangePublicToken(params.public_token, function (error, tokenResponse) {
+			if (error) {
+				res.status(400).send({
+					error: error,
+				});
+			}
+
+			console.log(tokenResponse);
+			/*
+			ACCESS_TOKEN = tokenResponse.access_token;
+			ITEM_ID = tokenResponse.item_id;
+			prettyPrintResponse(tokenResponse);
+			res.status(200).send({
+				access_token: ACCESS_TOKEN,
+				item_id: ITEM_ID,
+				error: null,
+			});
+			*/
+
+		});
+
+	} else {
+
+		res.status(400).send({
+			error: "Invalid or malformed token!"
+		});
+
+	}
+
+});
+
 /*
 api.post('/data', jwt(secret), (req, res) => {
 	if (req.user.loggued) {
-		return res.status(200).send({ status: "ok" })
+		return res.status(200).send({ status: "ok" });
 	}
-	res.status(401).send({ message: 'not authorized' })
+	res.status(401).send({ message: 'not authorized' });
 })
 
 /*

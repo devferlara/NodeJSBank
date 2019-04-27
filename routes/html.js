@@ -22,6 +22,14 @@ api.get('/index', function (req, res) {
 
 });
 
+api.get('/signout', function (req, res) {
+
+	req.session.destroy();
+	res.redirect('/login');	
+
+});
+
+
 api.get('/login', function (req, res) {
 	res.render('signin');
 });
