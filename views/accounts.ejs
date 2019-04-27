@@ -3,8 +3,7 @@
 	<div class="container-fluid">
 		<div class="row">
 			<div class="col-12">
-				<h1>Banks</h1>
-
+				<h1>Bank accounts</h1>
 				<div class="separator mb-5"></div>
 			</div>
 		</div>
@@ -25,20 +24,19 @@
 							<p class="list-item-heading mb-1 truncate"><%= account.created %></p>
 							<div class="list-item-heading mb-1 truncate">
 								<span style="cursor: pointer" class="delete_bank" data-name="<%= account.bank %>"
-									data-account_id="<%= account.account_id %>"><i class="simple-icon-trash"></i> Delete</span>
+									data-account_id="<%= account.account_id %>"><i class="simple-icon-trash"></i> Delete account</span>
 							</div>
 						</div>
 					</div>
 				</div>
 			</div>
 
-
 			<div class="col-12" id="not_accounts" style="display: none">
 				<div class="card d-flex flex-row mb-3">
 					<div class="pl-2 d-flex flex-grow-1 min-width-zero">
 						<div
 							class="card-body align-self-center d-flex flex-column flex-lg-row justify-content-between min-width-zero align-items-lg-center">
-							<p class="list-item-heading mb-1 truncate">No tienes bancos vinculados</p>
+							<p class="list-item-heading mb-1 truncate">You don't have bank accounts added</p>
 						</div>
 					</div>
 				</div>
@@ -51,7 +49,7 @@
 					<div class="pl-2 d-flex flex-grow-1 min-width-zero">
 						<div
 							class="card-body align-self-center d-flex flex-column flex-lg-row justify-content-between min-width-zero align-items-lg-center">
-							<p class="list-item-heading mb-1 truncate">No tienes bancos vinculados</p>
+							<p class="list-item-heading mb-1 truncate">You don't have bank accounts added</p>
 						</div>
 					</div>
 				</div>
@@ -74,14 +72,14 @@
 			var id = x.data("account_id");
 			var name = x.data("name");
 			swal({
-				title: "Eliminar cuenta",
-				text: "deseas eliminar la cuenta" + name,
+				title: "Information",
+				text: "Do you want to delete " + name + " from your accounts?",
 				type: "info",
 				showCancelButton: true,
 				html: true,
 				confirmButtonColor: "#145388",
-				confirmButtonText: "Confirmar",
-				cancelButtonText: "Cancelar",
+				confirmButtonText: "Yes, delete it",
+				cancelButtonText: "Cancel",
 				closeOnConfirm: false,
 				showLoaderOnConfirm: true,
 			},
@@ -102,15 +100,15 @@
 								$("#not_accounts").show();
 							}
 							setTimeout(function () {
-								swal("Banco eliminado",
-									"Hemos eliminado el banco " + name
+								swal("Account deleted",
+									"The " + name + " has been deleted from your accounts"
 								);
 							});
 
 						}).catch((error) => {
 							setTimeout(function () {
-								swal("Error la eliminacion",
-									"Lo sentimos pero no hemos podido eliminar el banco" + name,
+								swal("Ups, error",
+									"Sorry, we couldn't delete " + name + " from your accounts.",
 									"error"
 								);
 							}, 3000);

@@ -3,9 +3,14 @@
 <main>
 	<div class="container-fluid">
 		<div class="row">
-			<div class="col-12">
+			<div class="col-6">
 				<h1>Overview</h1>
 				<div class="separator mb-5"></div>
+			</div>
+			<div class="col-6 text-right">
+				<button class="connect btn btn-primary btn-lg mb-1">
+					Add account
+				</button>
 			</div>
 		</div>
 
@@ -19,15 +24,13 @@
 						<h5 class="mb-4">Information</h5>
 						<div class="mb-3">
 							<p>You don't have any account connected to plaid.</p>
-							<button id="connect" class="btn btn-primary btn-lg mb-1">
+							<button class="connect btn btn-primary btn-lg mb-1">
 								Connect with my bank account
 							</button>
 						</div>
 						<% } else { %>
 						ya tengo papu
 						<% } %>
-
-
 
 					</div>
 				</div>
@@ -47,8 +50,8 @@
 		console.log(Cookies.get('toke_user'));
 
 		var products = 'transactions'.split(',');
-		$("#connect").on("click", function (e) {
-			console.log("sdasdas2");
+		$(".connect").on("click", function ($) {
+
 			var handler = Plaid.create({
 				apiVersion: 'v2',
 				clientName: 'Plaid Quickstart',
@@ -68,7 +71,7 @@
 						},
 						headers: { 'Authorization': 'Bearer ' + Cookies.get('toke_user') }
 					}).then((response) => {
-						
+
 						var data = response.data;
 						swal({
 							title: "Information",
