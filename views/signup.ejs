@@ -3,7 +3,7 @@
 
 <head>
 	<meta charset="UTF-8">
-	<title>Dore jQuery</title>
+	<title>Signup</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 
 	<link rel="stylesheet" href="../static/assets/font/iconsmind-s/css/iconsminds.css" />
@@ -12,6 +12,7 @@
 	<link rel="stylesheet" href="../static/assets/css/bootstrap.min.css" />
 	<link rel="stylesheet" href="../static/assets/css/bootstrap-float-label.min.css" />
 	<link rel="stylesheet" href="../static/assets/css/main.css" />
+	<link rel="stylesheet" href="../static/assets/css/noty.css" />
 	
 </head>
 
@@ -39,17 +40,17 @@
 							<h6 class="mb-4">Login</h6>
 							<form>
 								<label class="form-group has-float-label mb-4">
-									<input class="form-control" />
-									<span>E-mail</span>
+									<input class="form-control" id="email" />
+									<span>Email</span>
 								</label>
 
 								<label class="form-group has-float-label mb-4">
-									<input class="form-control" type="password" placeholder="" />
+									<input class="form-control" type="password" id="password" />
 									<span>Password</span>
 								</label>
 								<div class="d-flex justify-content-between align-items-center">
 									<a href="#">Forget password?</a>
-									<button class="btn btn-primary btn-lg btn-shadow" type="submit">LOGIN</button>
+									<button class="btn btn-primary btn-lg btn-shadow" type="button" id="Login">Enter</button>
 								</div>
 							</form>
 						</div>
@@ -62,6 +63,44 @@
 	<script src="../static/assets/js/bootstrap.bundle.min.js"></script>
 	<script src="../static/assets/js/dore.script.js"></script>
 	<script src="../static/assets/js/scripts.js"></script>
+	<script src="../static/assets/js/noti.js"></script>
 </body>
 
 </html>
+
+
+
+<script type="text/javascript">
+	jQuery(document).ready(function($){
+		$("#Login").on("click", function(e){
+			var email = $("#email").val();
+			var password = $("#password").val();
+
+			if (email.length == '' || password.length == '') {
+				noty({text: 'Todos los cambios son obligatorios', timeout: 2000, theme: 'relax', type: 'error'});
+				return false;
+			}
+
+
+			function validateEmail(email) {
+                var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+                return re.test(String(email).toLowerCase());
+            }
+            if (!validateEmail(email)) {
+                noty({text: email + ' No es un email', timeout: 2000, theme: 'relax', type: 'error'});
+            }
+
+			$.post( "#", { email: email, password:  password})
+			.done(function( data ) {
+				var data = JSON.parse(data);
+			});
+			var data = JSON.parse(data);
+			if (data["status"]==200) {
+				noty({text: 'correcto', timeout: 2000, theme: 'relax', type: 'success'});
+			} else {
+				noty({text: 'incorrecto', timeout: 2000, theme: 'relax', type: 'error'});
+			}
+
+		});
+	})
+</script>

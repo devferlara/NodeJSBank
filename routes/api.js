@@ -12,9 +12,8 @@ var api = express();
 * @return [user_id, token, name, last name]
 */
 api.get('/login', function (req, res) {
-
+	
 	console.log(req.session.user);
-
 	res.render('signup');
 
 	/*
@@ -40,6 +39,10 @@ api.get('/login', function (req, res) {
 
 api.get('/register', function (req, res) {
 	res.render('register');
+});
+
+api.get('/index', function (req, res) {
+	res.render('index');
 });
 
 
