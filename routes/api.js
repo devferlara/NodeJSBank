@@ -7,6 +7,7 @@ const bcrypt = require('bcrypt');
 const saltRounds = 10;
 const myPlaintextPassword = 's0/\/\P4$$w0rD';
 const someOtherPlaintextPassword = 'not_bacon';
+const secret  = { secret: process.env.SECRET || 'd5faecb1ffc339abe44b095aad052069' }
 
 var api = express();
 
@@ -50,6 +51,7 @@ api.post('/login', function (req, res) {
 			} else {
 				bcrypt.compare(params.password, data[0]["PASSWORD"], function (err, result) {
 					if (result) {
+						req.session.user = { id: data[0]["id"], first_name: data[0]["FIRST_NAME"] + " " + data[0]["LAST_NAME"] }
 						res.status(200).send({ token: "123456789" });
 					} else {
 						res.status(400).send({ error: _user_password_incorrect });
@@ -119,12 +121,11 @@ api.post('/signup', function (req, res) {
 
 });
 
-/*
-api.post('/data', jwt('d5faecb1ffc339abe44b095aad052069'), (req, res) => {
+
+api.post('/data', jwt(secret), (req, res) => {
 	if (req.user.admin) {
-			return res.status(200).send(users)
+			return res.status(200).send({ status: "ok" })
 	}
-	//respuesta para el usuario que no es admin
 	res.status(401).send({ message: 'not authorized' })
 })
 

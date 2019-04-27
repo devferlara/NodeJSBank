@@ -10,7 +10,13 @@ api.get('/signup', function (req, res) {
 });
 
 api.get('/index', function (req, res) {
-	res.render('index');
+
+	if(!req.session.user) {
+		res.redirect('/login');
+	} else {
+		res.render('index');	
+	}
+	
 });
 
 api.get('/login', function (req, res) {
