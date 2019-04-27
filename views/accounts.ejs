@@ -1,0 +1,82 @@
+<%- include header %>
+<main>
+	<div class="container-fluid">
+		<div class="row">
+			<div class="col-12">
+				<h1>Banks</h1>
+
+				<div class="separator mb-5"></div>
+			</div>
+		</div>
+
+		<div class="row">
+
+			<% if (status == 'ok') { %>
+			<% data.forEach(function(account) { %>
+			<div class="col-12">
+				<div class="card d-flex flex-row mb-3">
+					<div class="pl-2 d-flex flex-grow-1 min-width-zero">
+						<div
+							class="card-body align-self-center d-flex flex-column flex-lg-row justify-content-between min-width-zero align-items-lg-center">
+							<a href="#" class="w-40 w-sm-100">
+								<p class="list-item-heading mb-1 truncate"><%= account.bank %></p>
+							</a>
+							<p class="mb-1 text-muted text-small w-15 w-sm-100"><%= username %></p>
+							<p class="mb-1 text-muted text-small w-15 w-sm-100"><%= account.created %></p>
+							<div class="w-15 w-sm-100">
+								<span style="cursor: pointer" class="delete_bank" data-account_id="<%= account.account_id %>"><i
+										class="simple-icon-trash"></i> Delete</span>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<% }); %>
+			<% } else { %>
+			estatus error
+			<% }  %>
+
+
+
+		</div>
+	</div>
+</main>
+<%- include footer %>
+
+
+
+<script type="text/javascript">
+	jQuery(document).ready(function ($) {
+		$('.delete_bank').click(function () {
+
+			var x = $(this);
+			var id = x.data("account_id");
+
+			swal({
+				title: "Confirmar sesión",
+				text: "asasdasd",
+				type: "info",
+				showCancelButton: true,
+				html: true,
+				confirmButtonColor: "#F1E31F",
+				confirmButtonText: "Confirmar",
+				cancelButtonText: "Cancelar",
+				closeOnConfirm: false,
+				showLoaderOnConfirm: true,
+			},
+				function (isConfirm) {
+					if (isConfirm) {
+
+						setTimeout(function () {
+							swal("Error en la reserva",
+								"Lo sentimos tus clases se han vencido, por favor contactarnos.",
+								"error"
+							);
+						}, 3000);
+
+					}
+				});
+
+		});
+	});
+</script>

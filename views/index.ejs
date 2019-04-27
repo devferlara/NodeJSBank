@@ -1,4 +1,4 @@
-<%- include header %> 
+<%- include header %>
 
 <main>
 	<div class="container-fluid">
@@ -26,11 +26,15 @@
 	</div>
 </main>
 
-<%- include footer %> 
+<%- include footer %>
 
 <script type="text/javascript">
+
+
+
 	jQuery(document).ready(function ($) {
-		var prueba = Cookies.get('toke_user');
+
+		console.log(Cookies.get('toke_user'));
 
 		var products = 'transactions'.split(',');
 		$("#connect").on("click", function ($) {
@@ -38,26 +42,29 @@
 			var handler = Plaid.create({
 				apiVersion: 'v2',
 				clientName: 'Plaid Quickstart',
-				env: 'sandbox',
+				env: '<%= PLAID_ENV %>',
 				product: products,
-				key: '5049c988e7104f6947fa3f78c5760f',
-				// webhook: 'https://your-domain.tld/plaid-webhook',
+				key: '<%= PLAID_PUBLIC_KEY %>',
 				onSuccess: function (public_token) {
 					console.log(public_token);
-					/*
-					$.post('/get_access_token', {
-						public_token: public_token
-					}, function (data) {
 					
-						$('#container').fadeOut('fast', function () {
-							$('#item_id').text(data.item_id);
-							$('#access_token').text(data.access_token);
-							$('#intro').hide();
-							$('#app, #steps').fadeIn('slow');
-						});
-					
+					axios({
+						method: 'post',
+						url: '/api/get_access_token',
+						data: {
+							public_token: public_token
+						},
+						headers: { 'Authorization': 'Bearer ' + Cookies.get('toke_user') }
+					}).then((response) => {
+
+						var data = response.data;
+						alert(data.status);
+
+						console.log(response)
+					}).catch((error) => {
+						console.log(error)
 					});
-					*/
+
 				},
 			}).open();
 
