@@ -13,27 +13,45 @@
 
 			<% if (status == 'ok') { %>
 			<% data.forEach(function(account) { %>
-			<div class="col-12">
+			<div class="col-12 card_accounts">
 				<div class="card d-flex flex-row mb-3">
 					<div class="pl-2 d-flex flex-grow-1 min-width-zero">
-						<div
-							class="card-body align-self-center d-flex flex-column flex-lg-row justify-content-between min-width-zero align-items-lg-center">
+						<div class="card-body align-self-center d-flex flex-column flex-lg-row justify-content-between min-width-zero align-items-lg-center">
 							<a href="#" class="w-40 w-sm-100">
 								<p class="list-item-heading mb-1 truncate"><%= account.bank %></p>
 							</a>
-							<p class="mb-1 text-muted text-small w-15 w-sm-100"><%= username %></p>
-							<p class="mb-1 text-muted text-small w-15 w-sm-100"><%= account.created %></p>
-							<div class="w-15 w-sm-100">
-								<span style="cursor: pointer" class="delete_bank" data-account_id="<%= account.account_id %>"><i
-										class="simple-icon-trash"></i> Delete</span>
+							<p class="list-item-heading mb-1 truncate"><%= username %></p>
+							<p class="list-item-heading mb-1 truncate"><%= account.created %></p>
+							<div class="list-item-heading mb-1 truncate">
+								<span style="cursor: pointer" class="delete_bank" data-name="<%= account.bank %>" data-account_id="<%= account.account_id %>"><i class="simple-icon-trash"></i> Delete</span>
 							</div>
 						</div>
 					</div>
 				</div>
 			</div>
+
+
+			<div class="col-12" id="not_accounts" style="display: none">
+				<div class="card d-flex flex-row mb-3">
+					<div class="pl-2 d-flex flex-grow-1 min-width-zero">
+						<div class="card-body align-self-center d-flex flex-column flex-lg-row justify-content-between min-width-zero align-items-lg-center">
+							<p class="list-item-heading mb-1 truncate">No tienes bancos vinculados</p>
+						</div>
+					</div>
+				</div>
+			</div>
+
 			<% }); %>
 			<% } else { %>
-			estatus error
+			<div class="col-12">
+				<div class="card d-flex flex-row mb-3">
+					<div class="pl-2 d-flex flex-grow-1 min-width-zero">
+						<div class="card-body align-self-center d-flex flex-column flex-lg-row justify-content-between min-width-zero align-items-lg-center">
+							<p class="list-item-heading mb-1 truncate">No tienes bancos vinculados</p>
+						</div>
+					</div>
+				</div>
+			</div>
 			<% }  %>
 
 
@@ -48,13 +66,12 @@
 <script type="text/javascript">
 	jQuery(document).ready(function ($) {
 		$('.delete_bank').click(function () {
-
 			var x = $(this);
 			var id = x.data("account_id");
-
+			var name = x.data("name");
 			swal({
-				title: "Confirmar sesión",
-				text: "asasdasd",
+				title: "Eliminar cuenta",
+				text: "deseas eliminar la cuenta" + name,
 				type: "info",
 				showCancelButton: true,
 				html: true,
@@ -64,18 +81,45 @@
 				closeOnConfirm: false,
 				showLoaderOnConfirm: true,
 			},
-				function (isConfirm) {
-					if (isConfirm) {
+			function (isConfirm) {
+				if (isConfirm) {
+					axios({
+						method: 'post',
+						url: '/api/remove_account',
+						data: {
+							account: id
+						},
+						headers: { 'Authorization': 'Bearer ' + Cookies.get('toke_user') }
+					}).then((response) => {
+						x.parent().parent().parent().parent().parent().remove();
+
+						if($(".card_accounts").length){
+						}else{
+							$("#not_accounts").show();
+						}
+						
 
 						setTimeout(function () {
-							swal("Error en la reserva",
-								"Lo sentimos tus clases se han vencido, por favor contactarnos.",
+							swal("Banco eliminado",
+								"Hemos eliminado el banco " + name
+								);
+						});
+
+					}).catch((error) => {
+						setTimeout(function () {
+							swal("Error la eliminacion",
+								"Lo sentimos pero no hemos podido eliminar el banco" + name,
 								"error"
-							);
+								);
 						}, 3000);
 
-					}
-				});
+					});
+
+
+
+
+				}
+			});
 
 		});
 	});

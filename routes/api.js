@@ -205,7 +205,7 @@ api.post('/remove_account', jwt(secret), (req, res) => {
 		}
 
 		DB.runQuery(
-			'DELETE FROM USERS_ACCOUNTS WHERE id = ?',
+			'DELETE FROM USER_ACCOUNTS WHERE id = ?',
 			[
 				params.account,
 			])
