@@ -12,8 +12,6 @@ api.get('/index', function (req, res) {
 	if (!req.session.user) {
 		res.redirect('/login');
 	} else {
-		
-
 
 		res.render('index', {
 			username: req.session.user.username,
@@ -25,7 +23,7 @@ api.get('/index', function (req, res) {
 api.get('/signout', function (req, res) {
 
 	req.session.destroy();
-	res.redirect('/login');	
+	res.redirect('/login');
 
 });
 
@@ -36,8 +34,9 @@ api.get('/login', function (req, res) {
 
 
 api.get('/banks', function (req, res) {
-	
-	res.render('banks');
+	res.render('banks', {
+		username: req.session.user.username,
+	});
 });
 
 
