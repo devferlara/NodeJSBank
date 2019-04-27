@@ -16,6 +16,13 @@ var connection = mysql.createConnection({
 	database: 'Plaid'
 });
 
+
+/*
+* String definitions
+*/
+var _email_required = 'Email is required';
+var _password_required = 'Password is required';
+
 /*
 * Login for users
 * Creates an express session every time a user is logged in
@@ -23,35 +30,54 @@ var connection = mysql.createConnection({
 * @param {string} password
 * @return [user_id, token, name, last name]
 */
-api.get('/login', function (req, res) {
+api.post('/login', function (req, res) {
 
-	connection.connect();
+	var params = req.body;
 
-	connection.query('SELECT 1 + 1 AS solution', function (error, results, fields) {
-		if (error) throw error;
-		console.log('The solution is: ', results[0].solution);
-	});
-
-	connection.end();
-
-	/*
-	if (req.session.user) {
-		res.status(200).send(
-			{
-				status: 'rokudaime',
-				soluble: 'arena',
-				user: req.session.user
-			}
-		);
-	} else {
-		req.session.user = { usuario: "diego lara" };
-		res.status(400).send(
-			{
-				status: 'no esta logueado' 
-			}
-		);
+	if (!params.email) {
+		res.status(400).send({ error: _email_required });
 	}
-	*/
+
+	if (!params.password) {
+		res.status(400).send({ error: _password_required });
+	}
+
+	DBQuery(
+		'SELECT ID, FIRST_NAME, EMAIL, PASSWORD FROM USERS WHERE EMAIL = ? AND PASSWORD = ?',
+		[
+			params.email,
+			params.password,
+		])
+		.then(data => {
+
+			if (data.length == 0) {
+
+			} else {
+				
+			}
+
+			console.log(data);
+			/*
+			bcrypt.compare(params.password, hash, function (err, res) {
+				if (res) {
+		
+				}
+				// res == true
+			});
+			*/
+
+			res.status(200).send();
+		})
+		.catch(error => {
+			console.log(error);
+
+			var defaultError = "We're having issues with the database, please try again";
+			res.status(400).send({ "error": defaultError });
+
+		});
+
+	
+
 });
 
 
@@ -82,7 +108,14 @@ api.post('/signup', function (req, res) {
 			if (err) {
 				res.status(400).send({ error: 'Has been an error in the process, please try again.' });
 			} else {
-				DBQuery('INSERT INTO USERS (FIRST_NAME, LAST_NAME, EMAIL, PASSWORD) VALUES ("' + params.first_name + '", "' + params.last_name + '", "' + params.email + '", "' + hash + '")')
+				DBQuery(
+					'INSERT INTO USERS (FIRST_NAME, LAST_NAME, EMAIL, PASSWORD) VALUES (?, ?, ?, ?)',
+					[
+						ucfirst(params.first_name),
+						ucfirst(params.last_name),
+						params.email.toLowerCase(),
+						hash
+					])
 					.then(data => {
 						res.status(200).send();
 					})
@@ -108,26 +141,35 @@ api.post('/signup', function (req, res) {
 });
 
 /*
-* 
+* DBQuery allows to user execute a query directly in the database
+* All queries are protected against SQL Injections
+* @param {string} query -> Main SQL with placeholders "?"
+* @param {[Object]} fields -> Data that will be sanitized into placeholders
+* @return promise with result
 */
-function DBQuery(query) {
+function DBQuery(query, fields) {
 	return new Promise((resolve, reject) => {
 		connection.connect();
-		connection.query(query, function (error, results) {
+		connection.query(query, fields, function (error, results) {
 			if (error) {
 				reject(error);
 			} else {
 				resolve(results);
 			}
+			connection.end();
 		});
-		connection.end();
 	});
 }
+
 
 function validateEmail(email) {
 	var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 	return re.test(String(email).toLowerCase());
 }
 
+function ucfirst(str) {
+	var firstLetter = str.slice(0,1);
+	return firstLetter.toUpperCase() + str.substring(1);
+}
 
 module.exports = api;
