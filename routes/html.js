@@ -35,4 +35,10 @@ api.get('/login', function (req, res) {
 });
 
 
+api.get('/banks', function (req, res) {
+	
+	res.render('banks');
+});
+
+
 module.exports = api;
