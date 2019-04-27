@@ -23,7 +23,44 @@ var client = new plaid.Client(
 
 api.get('/', function (req, res) {
 	if (req.session.user) {
-		res.redirect('/index');
+
+		//Let's check if the logged in user have accounts
+		//In order to show the add button or the statistics view
+		DB.runQuery(
+			'SELECT ID, ITEM_ID, ACCESS_TOKEN, CREATED_AT FROM USER_ACCOUNTS WHERE USER_ID = ?',
+			[
+				req.session.user.id,
+			])
+			.then(data => {
+
+				if (data.length == 0) {
+					res.render('index', {
+						username: req.session.user.username,
+						PLAID_PUBLIC_KEY: PLAID_PUBLIC_KEY,
+						PLAID_ENV: PLAID_ENV,
+						PLAID_PRODUCTS: PLAID_PRODUCTS,
+						accounts: 0
+					});
+				} else {
+					res.render('index', {
+						username: req.session.user.username,
+						PLAID_PUBLIC_KEY: PLAID_PUBLIC_KEY,
+						PLAID_ENV: PLAID_ENV,
+						PLAID_PRODUCTS: PLAID_PRODUCTS,
+						accounts: data.length
+					});
+				}
+
+			})
+			.catch(error => {
+				console.log(error);
+				var defaultError = "We're having issues with the database, please try again";
+				res.render('index', {
+					username: req.session.user.username,
+					status: "error"
+				});
+			});
+
 	} else {
 		res.redirect('/login');
 	}
@@ -37,28 +74,12 @@ api.get('/signup', function (req, res) {
 	}
 });
 
-api.get('/index', function (req, res) {
-
-	if (req.session.user) {
-		res.render('index', {
-			username: req.session.user.username,
-			PLAID_PUBLIC_KEY: PLAID_PUBLIC_KEY,
-			PLAID_ENV: PLAID_ENV,
-			PLAID_PRODUCTS: PLAID_PRODUCTS,
-		});
-	} else {
-		res.redirect('/login');
-	}
-
-});
-
 api.get('/signout', function (req, res) {
 
 	req.session.destroy();
 	res.redirect('/login');
 
 });
-
 
 api.get('/login', function (req, res) {
 	if (req.session.user) {

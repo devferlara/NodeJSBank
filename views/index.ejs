@@ -4,8 +4,7 @@
 	<div class="container-fluid">
 		<div class="row">
 			<div class="col-12">
-				<h1>Index</h1>
-
+				<h1>Overview</h1>
 				<div class="separator mb-5"></div>
 			</div>
 		</div>
@@ -15,9 +14,20 @@
 			<div class="col-12">
 				<div class="card mb-4">
 					<div class="card-body ">
-						<button id="connect">
-							Conectar
-						</button>
+
+						<% if (accounts == 0) { %>
+						<h5 class="mb-4">Information</h5>
+						<div class="mb-3">
+							<p>You don't have any account connected to plaid.</p>
+							<button id="connect" class="btn btn-primary btn-lg mb-1">
+								Connect with my bank account
+							</button>
+						</div>
+						<% } else { %>
+						ya tengo papu
+						<% } %>
+
+
 
 					</div>
 				</div>
@@ -47,7 +57,7 @@
 				key: '<%= PLAID_PUBLIC_KEY %>',
 				onSuccess: function (public_token) {
 					console.log(public_token);
-					
+
 					axios({
 						method: 'post',
 						url: '/api/get_access_token',
@@ -56,11 +66,22 @@
 						},
 						headers: { 'Authorization': 'Bearer ' + Cookies.get('toke_user') }
 					}).then((response) => {
-
+						
 						var data = response.data;
-						alert(data.status);
+						swal({
+							title: "Information",
+							text: "Your account has been added successfully",
+							type: "success",
+							html: true,
+							confirmButtonColor: "#F1E31F",
+							confirmButtonText: "Ok",
+						},
+							function (isConfirm) {
+								if (isConfirm) {
+									document.location.reload();
+								}
+							});
 
-						console.log(response)
 					}).catch((error) => {
 						console.log(error)
 					});
