@@ -23,7 +23,7 @@
 							<p class="mb-1 text-muted text-small w-15 w-sm-100">William garcia</p>
 							<p class="mb-1 text-muted text-small w-15 w-sm-100">2019-27-12 16:31:12</p>
 							<div class="w-15 w-sm-100">
-								<span style="cursor: pointer"><i class="simple-icon-trash"></i> Delete</span>
+								<span style="cursor: pointer" class="delete_bank"><i class="simple-icon-trash"></i> Delete</span>
 							</div>
 						</div>
 
@@ -36,3 +36,26 @@
 	</div>
 </main>
 <%- include footer %> 
+
+
+
+<script type="text/javascript">
+	jQuery(document).ready(function($){
+		$('.delete_bank').click(function(){
+			var x = $(this);
+			Swal({
+				title: '¿Are you sure?',
+				text: "You want to eliminate the bank",
+				type: 'warning',
+				showCancelButton: true,
+				confirmButtonColor: '#3085d6',
+				cancelButtonColor: '#d33',
+				confirmButtonText: 'Remove'
+			}).then((result) => {
+				if (result.value) {
+					console.log('eliminar');
+				}
+			})
+		});
+	});
+</script>
