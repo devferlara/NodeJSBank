@@ -119,8 +119,8 @@ api.post('/signup', function (req, res) {
 
 });
 
-
-app.post('/data', jwt('d5faecb1ffc339abe44b095aad052069'), (req, res) => {
+/*
+api.post('/data', jwt('d5faecb1ffc339abe44b095aad052069'), (req, res) => {
 	if (req.user.admin) {
 			return res.status(200).send(users)
 	}
