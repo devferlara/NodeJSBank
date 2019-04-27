@@ -3,6 +3,7 @@
 var express = require('express');
 var session = require('express-session');
 var helmet = require('helmet');
+var bodyParser = require('body-parser');
 
 var app = express();
 
@@ -11,6 +12,9 @@ app.use('/static', express.static('public'));
 app.set('view engine', 'ejs');
 
 app.set('trust proxy', 1);
+
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
 
 app.use(
 	session(
@@ -31,6 +35,6 @@ app.use(
 var api_routes = require('./routes/api');
 var html_routes = require('./routes/html');
 app.use('/api', api_routes);
-//app.use('/', html_routes);
+app.use('/', html_routes);
 
 module.exports = app;
