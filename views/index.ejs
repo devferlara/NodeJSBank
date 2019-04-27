@@ -142,6 +142,14 @@
     <script src="../static/assets/js/dore.script.js"></script>
     <script src="../static/assets/js/scripts.js"></script>
     <script src="../static/assets/js/noti.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
 </body>
 
 </html>
+
+<script type="text/javascript">
+    jQuery(document).ready(function($){
+        var prueba = Cookies.get('toke_user');
+        console.log(prueba);
+    })
+</script>

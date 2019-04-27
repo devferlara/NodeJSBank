@@ -64,6 +64,7 @@
 	<script src="../static/assets/js/dore.script.js"></script>
 	<script src="../static/assets/js/scripts.js"></script>
 	<script src="../static/assets/js/noti.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
 </body>
 
 </html>
@@ -90,16 +91,16 @@
                 noty({text: email + ' No es un email', timeout: 2000, theme: 'relax', type: 'error'});
             }
 
-			$.post( "#", { email: email, password:  password})
-			.done(function( data ) {
-				var data = JSON.parse(data);
-			});
-			var data = JSON.parse(data);
-			if (data["status"]==200) {
-				noty({text: 'correcto', timeout: 2000, theme: 'relax', type: 'success'});
-			} else {
-				noty({text: 'incorrecto', timeout: 2000, theme: 'relax', type: 'error'});
-			}
+			$.post( "/api/login", { email: email, password:  password})
+			.done(function(data) {
+				var toke_user = (data.token);
+				Cookies.set('toke_user', toke_user);
+				window.location.replace("/index");
+			})
+			.fail(function(data){
+				var error_data = (data.responseJSON.error);
+				noty({text: ''+error_data+'', timeout: 2000, theme: 'relax', type: 'error'});	
+			})
 
 		});
 	})
