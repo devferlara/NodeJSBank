@@ -101,7 +101,7 @@
 				email:email, password:password
 			})
 			.done(function() {
-				window.location.replace("/index");
+				window.location.replace("/");
 			})
 			.fail(function(data){
 				var error_data = (data.responseJSON.error);

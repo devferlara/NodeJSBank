@@ -226,6 +226,64 @@ api.post('/remove_account', jwt(secret), (req, res) => {
 });
 
 
+api.post('/accounts', jwt(secret), (req, res) => {
+
+	if (req.user.loggued) {
+
+		DB.runQuery(
+			'SELECT ID, ITEM_ID, ACCESS_TOKEN, CREATED_AT FROM USER_ACCOUNTS WHERE USER_ID = ?',
+			[
+				req.session.user.id,
+			])
+			.then(data => {
+				return processAccounts(data);
+			})
+			.then(data => {
+				res.status(200).send({
+					data: data
+				});
+			})
+			.catch(error => {
+				console.log(error);
+				var defaultError = "We're having issues with the database, please try again";
+				res.status(400).send({
+					status: "error"
+				});
+			});
+
+	}
+
+});
+
+async function processAccounts(array) {
+	var data = [];
+	for (const item of array) {
+		let account = await new Promise((resolve, reject) => {
+			client.getItem(item["ACCESS_TOKEN"], function (error, itemResponse) {
+				if (error != null) {
+					reject(error);
+				}
+				client.getInstitutionById(itemResponse.item.institution_id, function (err, instRes) {
+					if (err != null) {
+						reject(error);
+					} else {
+						var data = {
+							bank: instRes.institution.name,
+							created: new Date(item["CREATED_AT"]).toLocaleString(),
+							account_id: item["ID"]
+						}
+						resolve(data);
+					}
+				});
+			});
+		});
+		data.push(account);
+	}
+	return data;
+}
+
+
+
 
 function validateEmail(email) {
 	var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;

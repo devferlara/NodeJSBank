@@ -5,7 +5,6 @@
 		<div class="row">
 			<div class="col-6">
 				<h1>Overview</h1>
-				<div class="separator mb-5"></div>
 			</div>
 			<div class="col-6 text-right">
 				<button class="connect btn btn-primary btn-lg mb-1">
@@ -13,14 +12,13 @@
 				</button>
 			</div>
 		</div>
-
+		<br>
 		<div class="row">
 
+			<% if (accounts == 0) { %>
 			<div class="col-12">
 				<div class="card mb-4">
 					<div class="card-body ">
-
-						<% if (accounts == 0) { %>
 						<h5 class="mb-4">Information</h5>
 						<div class="mb-3">
 							<p>You don't have any account connected to plaid.</p>
@@ -28,13 +26,27 @@
 								Connect with my bank account
 							</button>
 						</div>
-						<% } else { %>
-						ya tengo papu
-						<% } %>
+					</div>
+				</div>
+			</div>
+			<% } else { %>
+				<div class="col-lg-6 mb-5">
+						<h6 class="mb-4">Shadow</h6>
+						<div class="chart-container">
+								<canvas id="pieChart"></canvas>
+						</div>
+				</div>
+
+			<div class="col-6">
+				<div class="card mb-4">
+					<div class="card-body ">
 
 					</div>
 				</div>
 			</div>
+			<% } %>
+
+
 		</div>
 	</div>
 </main>
@@ -43,14 +55,56 @@
 
 <script type="text/javascript">
 
-
+	if (document.getElementById("pieChart")) {
+		var pieChart = document.getElementById("pieChart");
+		var myChart = new Chart(pieChart, {
+			type: "PieWithShadow",
+			data: {
+				labels: ["Cakes", "Cupcakes", "Desserts"],
+				datasets: [
+					{
+						label: "",
+						borderWidth: 2,
+						data: [15, 25, 20]
+					}
+				]
+			},
+			draw: function () { },
+			options: {
+				plugins: {
+					datalabels: {
+						display: false
+					}
+				},
+				responsive: true,
+				maintainAspectRatio: false,
+				title: {
+					display: false
+				},
+				layout: {
+					padding: {
+						bottom: 20
+					}
+				},
+				legend: {
+					position: "bottom",
+					labels: {
+						padding: 30,
+						usePointStyle: true,
+						fontSize: 12
+					}
+				},
+				tooltips: chartTooltip
+			}
+		});
+	}
 
 	jQuery(document).ready(function ($) {
 
 		console.log(Cookies.get('toke_user'));
 
 		var products = 'transactions'.split(',');
-		$(".connect").on("click", function ($) {
+		$(".connect").on("click", function (e) {
 
 			var handler = Plaid.create({
 				apiVersion: 'v2',
@@ -81,11 +135,11 @@
 							confirmButtonColor: "#145388",
 							confirmButtonText: "Ok",
 						},
-						function (isConfirm) {
-							if (isConfirm) {
-								document.location.reload();
-							}
-						});
+							function (isConfirm) {
+								if (isConfirm) {
+									document.location.reload();
+								}
+							});
 
 					}).catch((error) => {
 						console.log(error)

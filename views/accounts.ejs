@@ -1,4 +1,36 @@
 <%- include header %>
+<style>
+	@keyframes placeHolderShimmer {
+		0% {
+			background-position: 0px 0
+		}
+
+		100% {
+			background-position: 1200px 0
+		}
+	}
+
+	.anim {
+		animation-duration: 1s;
+		animation-fill-mode: forwards;
+		animation-iteration-count: infinite;
+		animation-name: placeHolderShimmer;
+		animation-timing-function: linear;
+		background: #f6f7f8;
+		background: linear-gradient(to right, #eeeeee 40%, #dddddd 50%, #eeeeee 60%);
+		background-size: 1200px 104px;
+		height: 20px;
+		position: relative;
+	}
+	.pad10 {
+		padding-top:10px;
+		padding-bottom: 10px;
+	}
+	.pad8 {
+		padding-top:6px;
+		padding-bottom: 6px;
+	}
+</style>
 <main>
 	<div class="container-fluid">
 		<div class="row">
@@ -8,30 +40,28 @@
 			</div>
 		</div>
 
-		<div class="row">
+		<div class="row" id="accounts">
 
-			<% if (status == 'ok') { %>
-			<% data.forEach(function(account) { %>
-			<div class="col-12 card_accounts">
-				<div class="card d-flex flex-row mb-3">
+			<div class="col-12 card_accounts" id="loader">
+				<div class="card d-flex flex-row mb-3 pad10">
 					<div class="pl-2 d-flex flex-grow-1 min-width-zero">
 						<div
 							class="card-body align-self-center d-flex flex-column flex-lg-row justify-content-between min-width-zero align-items-lg-center">
-							<a href="#" class="w-40 w-sm-100">
-								<p class="list-item-heading mb-1 truncate"><%= account.bank %></p>
+							<a href="#" class="w-20 w-sm-100">
+								<div class="anim"></div>
 							</a>
-							<p class="list-item-heading mb-1 truncate"><%= username %></p>
-							<p class="list-item-heading mb-1 truncate"><%= account.created %></p>
-							<div class="list-item-heading mb-1 truncate">
-								<span style="cursor: pointer" class="delete_bank" data-name="<%= account.bank %>"
-									data-account_id="<%= account.account_id %>"><i class="simple-icon-trash"></i> Delete account</span>
-							</div>
+							<a href="#" class="w-20 w-sm-100">
+								<div class="anim"></div>
+							</a>
+							<a href="#" class="w-20 w-sm-100">
+								<div class="anim"></div>
+							</a>
 						</div>
 					</div>
 				</div>
 			</div>
 
-			<div class="col-12" id="not_accounts" style="display: none">
+			<div class="col-12" id="no_accounts" style="display:none;">
 				<div class="card d-flex flex-row mb-3">
 					<div class="pl-2 d-flex flex-grow-1 min-width-zero">
 						<div
@@ -41,33 +71,61 @@
 					</div>
 				</div>
 			</div>
-
-			<% }); %>
-			<% } else { %>
-			<div class="col-12">
-				<div class="card d-flex flex-row mb-3">
-					<div class="pl-2 d-flex flex-grow-1 min-width-zero">
-						<div
-							class="card-body align-self-center d-flex flex-column flex-lg-row justify-content-between min-width-zero align-items-lg-center">
-							<p class="list-item-heading mb-1 truncate">You don't have bank accounts added</p>
-						</div>
-					</div>
-				</div>
-			</div>
-			<% }  %>
-
-
 
 		</div>
 	</div>
 </main>
+
 <%- include footer %>
+
 
 
 
 <script type="text/javascript">
 	jQuery(document).ready(function ($) {
-		$('.delete_bank').click(function () {
+
+		axios({
+			method: 'post',
+			url: '/api/accounts',
+			headers: { 'Authorization': 'Bearer ' + Cookies.get('toke_user') }
+		}).then((response) => {
+			console.log(response.data.data);
+			$("#loader").remove();
+			if(response.data.data.length == 0) {
+				$("#no_accounts").show();
+			}
+			response.data.data.forEach(function (entry) {
+				$("#accounts").append(`
+				<div class="col-12 card_accounts">
+					<div class="card d-flex flex-row mb-3 pad8">
+						<div class="pl-2 d-flex flex-grow-1 min-width-zero">
+							<div
+								class="card-body align-self-center d-flex flex-column flex-lg-row justify-content-between min-width-zero align-items-lg-center">
+								<a href="#" class="w-20 w-sm-100">
+									<p class="list-item-heading mb-1 truncate">${entry.bank}</p>
+								</a>
+								<a href="#" class="w-20 w-sm-100">
+									<p class="list-item-heading mb-1 truncate">${entry.created}</p>
+								</a>
+								<a href="#" class="w-20 w-sm-100 delete_bank" data-name="${entry.bank}"
+											data-account_id="${entry.account_id}">
+									<div class="list-item-heading mb-1 truncate">
+										<span style="cursor: pointer"><i class="simple-icon-trash"></i> Remove account</span>
+									</div>
+								</a>
+							</div>
+						</div>
+					</div>
+				</div>`);
+			});
+
+		}).catch((error) => {
+			console.log(error);
+			$("#no_accounts").show();
+		});
+
+
+		$('body').on("click", '.delete_bank', function(e){
 			var x = $(this);
 			var id = x.data("account_id");
 			var name = x.data("name");
@@ -94,10 +152,8 @@
 							headers: { 'Authorization': 'Bearer ' + Cookies.get('toke_user') }
 						}).then((response) => {
 							x.parent().parent().parent().parent().parent().remove();
-
-							if ($(".card_accounts").length) {
-							} else {
-								$("#not_accounts").show();
+							if ($(".card_accounts").length == 0) {
+								$("#no_accounts").show();
 							}
 							setTimeout(function () {
 								swal("Account deleted",

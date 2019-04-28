@@ -95,7 +95,7 @@
 			.done(function(data) {
 				var toke_user = (data.token);
 				Cookies.set('toke_user', toke_user);
-				window.location.replace("/index");
+				window.location.replace("/");
 			})
 			.fail(function(data){
 				var error_data = (data.responseJSON.error);
