@@ -9,8 +9,8 @@ const PLAID_SECRET = 'b416a1e08275b0de5251a46f3a5b8c';
 const PLAID_PUBLIC_KEY = '5049c988e7104f6947fa3f78c5760f';
 var PLAID_PRODUCTS = 'transactions';
 const PLAID_ENV = 'sandbox';
-var moment = require('moment');
-var _ = require('lodash');
+
+
 
 /*
 * Plaid client
@@ -29,7 +29,6 @@ var client = new plaid.Client(
 --------------------------------------------------------------------------------------*/
 api.get('/', function (req, res) {
 	if (req.session.user) {
-
 		//Let's check if the logged in user have accounts
 		//In order to show the add account button or the statistics view
 		DB.runQuery(
@@ -39,30 +38,17 @@ api.get('/', function (req, res) {
 			])
 			.then(data => {
 
-				return getTransactions(data);
-			})
-			.then(result => {
+				console.log(data);
 
-				result.forEach(function (data) {
-					
-					var grouped = _.groupBy(data.transactions, function (item) {
-						return item.category;
-					});
-
-					console.log(grouped);
-					console.log("Esto es un grouped");
-
-				});
-
-			})
-			.then(result => {
 				res.render('index', {
 					username: req.session.user.username,
 					PLAID_PUBLIC_KEY: PLAID_PUBLIC_KEY,
 					PLAID_ENV: PLAID_ENV,
 					PLAID_PRODUCTS: PLAID_PRODUCTS,
-					accounts: 2
+					accounts: data
 				});
+
+				//return getTransactions(data);
 			})
 			.catch(error => {
 				console.log(error);
@@ -78,29 +64,7 @@ api.get('/', function (req, res) {
 	}
 });
 
-async function getTransactions(array) {
-	var data = [];
-	for (const item of array) {
-		let transactions = await new Promise((resolve, reject) => {
 
-			var startDate = moment().subtract(30, 'days').format('YYYY-MM-DD');
-			var endDate = moment().format('YYYY-MM-DD');
-			client.getTransactions(item["ACCESS_TOKEN"], startDate, endDate, {
-				count: 250,
-				offset: 0,
-			}, function (error, transactionsResponse) {
-				if (error != null) {
-					reject(error);
-				} else {
-					resolve(transactionsResponse)
-				}
-			});
-
-		});
-		data.push(transactions);
-	}
-	return data;
-}
 /*-------------------------------------------------------------------------------------
 	End of Index 																			
 --------------------------------------------------------------------------------------*/

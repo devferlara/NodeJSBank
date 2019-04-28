@@ -8,8 +8,9 @@ const saltRounds = 10;
 const myPlaintextPassword = 's0/\/\P4$$w0rD';
 const someOtherPlaintextPassword = 'not_bacon';
 const secret = { secret: 'd5faecb1ffc339abe44b095aad052069' }
-
+var moment = require('moment');
 const DB = require('../helpers/DB');
+var _ = require('lodash');
 
 const plaid = require('plaid');
 const PLAID_CLIENT_ID = '5c813c380c368f0012c2e8ed';
@@ -226,6 +227,112 @@ api.post('/remove_account', jwt(secret), (req, res) => {
 });
 
 
+
+
+api.post('/accounts_data', jwt(secret), (req, res) => {
+
+	if (req.user.loggued) {
+
+		DB.runQuery(
+			'SELECT ID, ITEM_ID, ACCESS_TOKEN, CREATED_AT FROM USER_ACCOUNTS WHERE USER_ID = ?',
+			[
+				req.user.id,
+			])
+			.then(data => {
+				return getTransactions(data);
+			})
+			.then(result => {
+
+				var array = [];
+				var grouped = [];
+
+				result.forEach(function (data) {
+					grouped = _.groupBy(data.transactionsRaw.transactions, function (item) {
+						return item.category;
+					});
+					array.push({
+						name: data.bank,
+						id: data.account_id,
+						accounts: data.transactionsRaw.accounts,
+						transactions: grouped
+					});
+				});
+
+				return array;
+
+			})
+			.then(result => {
+				res.status(200).send({
+					data: result,
+					diego: "diego"
+				});
+			})
+			.catch(error => {
+				console.log(error);
+				var defaultError = "We're having issues with the database, please try again";
+				res.status(400).send({
+					username: req.session.user.username,
+					status: "error"
+				});
+			});
+	}
+
+});
+
+async function getTransactions(array) {
+
+	var data = [];
+	for (const item of array) {
+		let transactions = await new Promise((resolve, reject) => {
+
+			var startDate = moment().subtract(1, 'months').startOf('month').format('YYYY-MM-DD');
+			var endDate = moment().subtract(1, 'months').endOf('month').format('YYYY-MM-DD');
+
+			client.getItem(item["ACCESS_TOKEN"], function (error, itemResponse) {
+				if (error != null) {
+					reject(error);
+				}
+				client.getInstitutionById(itemResponse.item.institution_id, function (err, instRes) {
+					if (err != null) {
+						reject(error);
+					} else {
+
+						client.getTransactions(item["ACCESS_TOKEN"], startDate, endDate, {
+							count: 250,
+							offset: 0,
+						}, function (error, transactionsResponse) {
+							if (error != null) {
+								reject(error);
+							} else {
+
+								console.log("Banco " + instRes.institution.name);
+								console.log(transactionsResponse);
+
+								resolve({
+									bank: instRes.institution.name,
+									account_id: item["ID"],
+									transactionsRaw: transactionsResponse
+								});
+							}
+						});
+
+					}
+				});
+			});
+
+		});
+
+		data.push(transactions);
+
+	}
+
+
+
+	return data;
+}
+
+
+
 api.post('/accounts', jwt(secret), (req, res) => {
 
 	if (req.user.loggued) {
@@ -233,7 +340,7 @@ api.post('/accounts', jwt(secret), (req, res) => {
 		DB.runQuery(
 			'SELECT ID, ITEM_ID, ACCESS_TOKEN, CREATED_AT FROM USER_ACCOUNTS WHERE USER_ID = ?',
 			[
-				req.session.user.id,
+				req.user.id,
 			])
 			.then(data => {
 				return processAccounts(data);

@@ -22,12 +22,14 @@
 		height: 20px;
 		position: relative;
 	}
+
 	.pad10 {
-		padding-top:10px;
+		padding-top: 10px;
 		padding-bottom: 10px;
 	}
+
 	.pad8 {
-		padding-top:6px;
+		padding-top: 6px;
 		padding-bottom: 6px;
 	}
 </style>
@@ -79,8 +81,6 @@
 <%- include footer %>
 
 
-
-
 <script type="text/javascript">
 	jQuery(document).ready(function ($) {
 
@@ -91,7 +91,7 @@
 		}).then((response) => {
 			console.log(response.data.data);
 			$("#loader").remove();
-			if(response.data.data.length == 0) {
+			if (response.data.data.length == 0) {
 				$("#no_accounts").show();
 			}
 			response.data.data.forEach(function (entry) {
@@ -110,7 +110,7 @@
 								<a href="#" class="w-20 w-sm-100 delete_bank" data-name="${entry.bank}"
 											data-account_id="${entry.account_id}">
 									<div class="list-item-heading mb-1 truncate">
-										<span style="cursor: pointer"><i class="simple-icon-trash"></i> Remove account</span>
+										<span style="cursor: pointer"><i class="simple-icon-trash"></i> Remove bank account</span>
 									</div>
 								</a>
 							</div>
@@ -125,10 +125,12 @@
 		});
 
 
-		$('body').on("click", '.delete_bank', function(e){
+		$('body').on("click", '.delete_bank', function (e) {
+
 			var x = $(this);
 			var id = x.data("account_id");
 			var name = x.data("name");
+
 			swal({
 				title: "Information",
 				text: "Do you want to delete " + name + " from your accounts?",
@@ -151,14 +153,18 @@
 							},
 							headers: { 'Authorization': 'Bearer ' + Cookies.get('toke_user') }
 						}).then((response) => {
-							x.parent().parent().parent().parent().parent().remove();
-							if ($(".card_accounts").length == 0) {
-								$("#no_accounts").show();
-							}
-							setTimeout(function () {
-								swal("Account deleted",
-									"The " + name + " has been deleted from your accounts"
-								);
+
+							swal.close();
+
+							x.parent().parent().parent().parent().animate({ opacity: 0 }, 400, function (e) {
+								$(this).stop().animate({
+									height: "0px",
+								}, 400, function (e) {
+									$(this).remove();
+									if ($(".card_accounts").length == 0) {
+										$("#no_accounts").show();
+									}
+								});
 							});
 
 						}).catch((error) => {

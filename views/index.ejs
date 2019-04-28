@@ -1,5 +1,90 @@
 <%- include header %>
+<style>
+	@keyframes placeHolderShimmer {
+		0% {
+			background-position: 0px 0
+		}
 
+		100% {
+			background-position: 1200px 0
+		}
+	}
+
+	.anim {
+		animation-duration: 1s;
+		animation-fill-mode: forwards;
+		animation-iteration-count: infinite;
+		animation-name: placeHolderShimmer;
+		animation-timing-function: linear;
+		background: #f6f7f8;
+		background: linear-gradient(to right, #eeeeee 40%, #dddddd 50%, #eeeeee 60%);
+		background-size: 1200px 104px;
+		height: 20px;
+		position: relative;
+	}
+
+	.pad10 {
+		padding-top: 10px;
+		padding-bottom: 10px;
+	}
+
+	.pad8 {
+		padding-top: 6px;
+		padding-bottom: 6px;
+	}
+
+	.bola {
+		width: 350px;
+		height: 350px;
+		border-radius: 350px;
+	}
+
+	@media (max-width: 700px) {
+		.bola {
+			width: 250px !important;
+			height: 250px !important;
+			border-radius: 250px !important;
+		}
+	}
+
+	@media (min-width: 990px) and (max-width: 1400px) {
+		.bola {
+			width: 250px !important;
+			height: 250px !important;
+			border-radius: 250px !important;
+		}
+	}
+
+	.bola {
+		position: absolute;
+		top: 50%;
+		margin-top: -120px;
+		left: 100px;
+	}
+
+	.rows {
+		right: 0;
+		position: absolute;
+		height: 20px;
+		width: 190px;
+	}
+
+	.row1 {
+		top: 10%;
+	}
+
+	.row2 {
+		top: 20%;
+	}
+
+	.row3 {
+		top: 30%;
+	}
+
+	.shadow_title {
+		width: 200px;
+	}
+</style>
 <main>
 	<div class="container-fluid">
 		<div class="row">
@@ -13,9 +98,12 @@
 			</div>
 		</div>
 		<br>
-		<div class="row">
 
-			<% if (accounts == 0) { %>
+
+
+		<div class="row" id="data">
+
+			<% if (accounts.length == 0) { %>
 			<div class="col-12">
 				<div class="card mb-4">
 					<div class="card-body ">
@@ -30,22 +118,29 @@
 				</div>
 			</div>
 			<% } else { %>
-				<div class="col-lg-6 mb-5">
-						<h6 class="mb-4">Shadow</h6>
+
+			<div class="col-md-12 placeholders" style="margin-top:120px;">
+				<div class="row">
+					<div class="col-lg-3">
+						<div class="anim"></div>
+					</div>
+					<div class="col-lg-8"></div>
+					<div class="col-lg-6 mb-5">
 						<div class="chart-container">
-								<canvas id="pieChart"></canvas>
+							<div class="anim bola"></div>
+							<div class="anim rows row1"></div>
+							<div class="anim rows row2"></div>
+							<div class="anim rows row3"></div>
 						</div>
-				</div>
-
-			<div class="col-6">
-				<div class="card mb-4">
-					<div class="card-body ">
-
+					</div>
+					<div class="col-lg-6 mb-5">
+						<div class="chart-container">
+						</div>
 					</div>
 				</div>
 			</div>
-			<% } %>
 
+			<% } %>
 
 		</div>
 	</div>
@@ -55,53 +150,120 @@
 
 <script type="text/javascript">
 
-	if (document.getElementById("pieChart")) {
-		var pieChart = document.getElementById("pieChart");
-		var myChart = new Chart(pieChart, {
-			type: "PieWithShadow",
-			data: {
-				labels: ["Cakes", "Cupcakes", "Desserts"],
-				datasets: [
-					{
-						label: "",
-						borderWidth: 2,
-						data: [15, 25, 20]
-					}
-				]
-			},
-			draw: function () { },
-			options: {
-				plugins: {
-					datalabels: {
-						display: false
-					}
-				},
-				responsive: true,
-				maintainAspectRatio: false,
-				title: {
-					display: false
-				},
-				layout: {
-					padding: {
-						bottom: 20
-					}
-				},
-				legend: {
-					position: "bottom",
-					labels: {
-						padding: 30,
-						usePointStyle: true,
-						fontSize: 12
-					}
-				},
-				tooltips: chartTooltip
-			}
-		});
-	}
-
 	jQuery(document).ready(function ($) {
-
 		console.log(Cookies.get('toke_user'));
+		axios({
+			method: 'post',
+			url: '/api/accounts_data',
+			headers: { 'Authorization': 'Bearer ' + Cookies.get('toke_user') }
+		}).then((response) => {
+
+			var data = response.data.data;
+
+			console.log(data);
+
+			$(".placeholders").remove();
+
+			var colorArray = ['#F8B195', '#F67280', '#C06C84', '#6C5B7B', '#355C7D', '#D4E1E8', '#FFF9D2', '#FF6F61', '#4799FC', '#3B71B2'];
+
+			data.forEach(function (item) {
+				$("#data").append(`
+				<div class="col-md-12" style="margin-top:60px;">
+					<div class="row">
+						<div class="col-lg-3">
+							<h3>${item.name}</h3>
+						</div>
+						<div class="col-lg-8"></div>
+						<div class="col-lg-12" style="height: 30px;"></div>
+						<div class="col-lg-6 mb-5">
+							<div class="chart-container" style="height: 400px;">
+								<canvas id="pieChart_${item.id}"></canvas>
+							</div>
+						</div>
+						<div class="col-lg-6 mb-5">
+							<div class="chart-container">
+							</div>
+						</div>
+						<div class="col-lg-12"><hr /></div>
+					</div>
+				</div>`);
+
+				var categories = [];
+				var values = [];
+
+				console.log(item.name + " ------ ");
+
+				for (var k in item.transactions) {
+					var sum = 0;
+					item.transactions[k].forEach(function (res) {
+						sum += res["amount"];
+						//console.log(res);
+					});
+					console.log(k + " " + sum);
+					categories.push(k);
+					values.push(sum);
+				}
+
+				console.log(item.name + " ------ ");
+				console.log(" ------ ");
+				console.log(" ------ ");
+				console.log(" ------ ");
+
+				/*
+				item.transactions.forEach(function (element) {
+					Object.keys(element).forEach(function (key) {
+						console.log("key:" + key + "value:" + element[key]);
+					});
+				});
+				*/
+
+				var pieChart = document.getElementById("pieChart_" + item.id);
+				var myChart = new Chart(pieChart, {
+					type: "pie",
+					data: {
+						labels: categories,
+						datasets: [
+							{
+								backgroundColor: colorArray,
+								label: "",
+								data: values
+							}
+						]
+					},
+					draw: function () { },
+					options: {
+						plugins: {
+							datalabels: {
+								display: false
+							}
+						},
+						responsive: true,
+						maintainAspectRatio: false,
+						title: {
+							display: false
+						},
+						layout: {
+							padding: {
+								bottom: 20
+							}
+						},
+						legend: {
+							position: "right",
+							labels: {
+								usePointStyle: true,
+								fontSize: 12
+							}
+						}
+					}
+				});
+
+			});
+
+		}).catch((error) => {
+
+			console.log(error);
+
+		});
 
 		var products = 'transactions'.split(',');
 		$(".connect").on("click", function (e) {
@@ -115,7 +277,7 @@
 				onSuccess: function (public_token) {
 					console.log(public_token);
 
-					$('body').loading({ stoppable: true });
+					$('html').loading({ stoppable: false });
 
 					axios({
 						method: 'post',
@@ -127,21 +289,21 @@
 					}).then((response) => {
 
 						var data = response.data;
-						swal({
-							title: "Information",
-							text: "Your account has been added successfully",
-							type: "success",
-							html: true,
-							confirmButtonColor: "#145388",
-							confirmButtonText: "Ok",
-						},
-							function (isConfirm) {
-								if (isConfirm) {
-									document.location.reload();
-								}
-							});
+
+						$('html').loading({
+							message: 'Account added succesfully',
+						});
+						setTimeout(function (e) {
+							document.location.reload();
+						}, 2000);
 
 					}).catch((error) => {
+						$('html').loading({
+							message: 'Something goes wrong, please try again.',
+						});
+						setTimeout(function (e) {
+							$('html').loading('stop');
+						}, 2000);
 						console.log(error)
 					});
 
