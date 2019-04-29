@@ -264,7 +264,7 @@ api.post('/accounts_data', jwt(secret), (req, res) => {
 			.then(result => {
 				res.status(200).send({
 					data: result,
-					diego: "diego"
+					month: moment().subtract(1, "month").startOf("month").format('MMMM YYYY')
 				});
 			})
 			.catch(error => {

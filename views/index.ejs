@@ -170,10 +170,9 @@
 				$("#data").append(`
 				<div class="col-md-12" style="margin-top:60px;">
 					<div class="row">
-						<div class="col-lg-3">
-							<h3>${item.name}</h3>
+						<div class="col-lg-12">
+							<h3>${item.name} - ${response.data.month}</h3>
 						</div>
-						<div class="col-lg-8"></div>
 						<div class="col-lg-12" style="height: 30px;"></div>
 						<div class="col-lg-6 mb-5">
 							<div class="chart-container" style="height: 400px;">
@@ -181,15 +180,21 @@
 							</div>
 						</div>
 						<div class="col-lg-6 mb-5">
-							<div class="chart-container">
-							</div>
+                     <h6 class="mb-4">${item.name} - Historical ${response.data.month}</h6>
+                     <div class="chart-container">
+                        <canvas id="salesChartNoShadow_${item.id}"></canvas>
+                     </div>
 						</div>
 						<div class="col-lg-12"><hr /></div>
 					</div>
 				</div>`);
 
-				var categories = [];
-				var values = [];
+
+				var pie_categories = [];
+				var pie_values = [];
+
+				var line_accounts = [];
+				var line_values = [];
 
 				console.log(item.name + " ------ ");
 
@@ -197,36 +202,21 @@
 					var sum = 0;
 					item.transactions[k].forEach(function (res) {
 						sum += res["amount"];
-						//console.log(res);
 					});
-					console.log(k + " " + sum);
-					categories.push(k);
-					values.push(sum);
+					pie_categories.push(k);
+					pie_values.push(sum);
 				}
-
-				console.log(item.name + " ------ ");
-				console.log(" ------ ");
-				console.log(" ------ ");
-				console.log(" ------ ");
-
-				/*
-				item.transactions.forEach(function (element) {
-					Object.keys(element).forEach(function (key) {
-						console.log("key:" + key + "value:" + element[key]);
-					});
-				});
-				*/
 
 				var pieChart = document.getElementById("pieChart_" + item.id);
 				var myChart = new Chart(pieChart, {
 					type: "pie",
 					data: {
-						labels: categories,
+						labels: pie_categories,
 						datasets: [
 							{
 								backgroundColor: colorArray,
 								label: "",
-								data: values
+								data: pie_values
 							}
 						]
 					},
@@ -254,6 +244,71 @@
 								fontSize: 12
 							}
 						}
+					}
+				});
+
+
+
+				var salesChartNoShadow = document
+					.getElementById("salesChartNoShadow_" + item.id)
+					.getContext("2d");
+				var myChart = new Chart(salesChartNoShadow, {
+					type: "line",
+					options: {
+						plugins: {
+							datalabels: {
+								display: false
+							}
+						},
+						responsive: true,
+						maintainAspectRatio: false,
+						scales: {
+							yAxes: [
+								{
+									gridLines: {
+										display: true,
+										lineWidth: 1,
+										color: "rgba(0,0,0,0.1)",
+										drawBorder: false
+									},
+									ticks: {
+										beginAtZero: true,
+										stepSize: 5,
+										min: 50,
+										max: 70,
+										padding: 20
+									}
+								}
+							],
+							xAxes: [
+								{
+									gridLines: {
+										display: false
+									}
+								}
+							]
+						},
+						legend: {
+							display: false
+						}
+					},
+					data: {
+						labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+						datasets: [
+							{
+								label: "",
+								data: [54, 63, 60, 65, 60, 68, 60],
+								borderColor: "#09f",
+								pointBackgroundColor: "#09f",
+								pointBorderColor: "#09f",
+								pointHoverBackgroundColor: "#09f",
+								pointHoverBorderColor: "#09f",
+								pointRadius: 6,
+								pointBorderWidth: 2,
+								pointHoverRadius: 8,
+								fill: false
+							}
+						]
 					}
 				});
 
