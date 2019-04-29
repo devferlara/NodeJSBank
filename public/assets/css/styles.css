@@ -1,0 +1,124 @@
+@keyframes placeHolderShimmer {
+	0% {
+		background-position: 0px 0
+	}
+
+	100% {
+		background-position: 1200px 0
+	}
+}
+
+.anim {
+	animation-duration: 1s;
+	animation-fill-mode: forwards;
+	animation-iteration-count: infinite;
+	animation-name: placeHolderShimmer;
+	animation-timing-function: linear;
+	background: #f6f7f8;
+	background: linear-gradient(to right, #eeeeee 40%, #dddddd 50%, #eeeeee 60%);
+	background-size: 1200px 104px;
+	height: 20px;
+	position: relative;
+}
+
+.pad10 {
+	padding-top: 10px;
+	padding-bottom: 10px;
+}
+
+.pad8 {
+	padding-top: 6px;
+	padding-bottom: 6px;
+}
+
+.bola {
+	width: 350px;
+	height: 350px;
+	border-radius: 350px;
+}
+
+@media (max-width: 700px) {
+	.bola {
+		width: 250px !important;
+		height: 250px !important;
+		border-radius: 250px !important;
+	}
+}
+
+@media (min-width: 990px) and (max-width: 1400px) {
+	.bola {
+		width: 250px !important;
+		height: 250px !important;
+		border-radius: 250px !important;
+	}
+}
+
+.bola {
+	position: absolute;
+	top: 50%;
+	margin-top: -120px;
+	left: 100px;
+}
+
+.rows {
+	right: 0;
+	position: absolute;
+	height: 20px;
+	width: 190px;
+}
+
+.row1 {
+	top: 10%;
+}
+
+.row2 {
+	top: 20%;
+}
+
+.row3 {
+	top: 30%;
+}
+
+.shadow_title {
+	width: 200px;
+}
+
+
+
+
+
+
+
+
+@keyframes placeHolderShimmer {
+	0% {
+		background-position: 0px 0
+	}
+
+	100% {
+		background-position: 1200px 0
+	}
+}
+
+.anim {
+	animation-duration: 1s;
+	animation-fill-mode: forwards;
+	animation-iteration-count: infinite;
+	animation-name: placeHolderShimmer;
+	animation-timing-function: linear;
+	background: #f6f7f8;
+	background: linear-gradient(to right, #eeeeee 40%, #dddddd 50%, #eeeeee 60%);
+	background-size: 1200px 104px;
+	height: 20px;
+	position: relative;
+}
+
+.pad10 {
+	padding-top: 10px;
+	padding-bottom: 10px;
+}
+
+.pad8 {
+	padding-top: 6px;
+	padding-bottom: 6px;
+}
