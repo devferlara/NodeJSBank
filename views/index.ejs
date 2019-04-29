@@ -196,12 +196,17 @@
 				var line_accounts = [];
 				var line_values = [];
 
-				console.log(item.name + " ------ ");
+				for (var a in item.accounts) {
+					line_accounts.push(item.accounts[a]["name"]);
+					line_values.push(item.accounts[a]["balances"]["current"]);
+				}
 
 				for (var k in item.transactions) {
 					var sum = 0;
+					
 					item.transactions[k].forEach(function (res) {
 						sum += res["amount"];
+						
 					});
 					pie_categories.push(k);
 					pie_values.push(sum);
@@ -270,13 +275,6 @@
 										lineWidth: 1,
 										color: "rgba(0,0,0,0.1)",
 										drawBorder: false
-									},
-									ticks: {
-										beginAtZero: true,
-										stepSize: 5,
-										min: 50,
-										max: 70,
-										padding: 20
 									}
 								}
 							],
@@ -293,11 +291,11 @@
 						}
 					},
 					data: {
-						labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+						labels: line_accounts,
 						datasets: [
 							{
 								label: "",
-								data: [54, 63, 60, 65, 60, 68, 60],
+								data: line_values,
 								borderColor: "#09f",
 								pointBackgroundColor: "#09f",
 								pointBorderColor: "#09f",
