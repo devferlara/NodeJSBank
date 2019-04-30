@@ -4,5 +4,5 @@ var app = require('./app');
 var port = process.env.port || 80;
 
 app.listen(port, function(){
-    console.log("The server is running");
+    console.log("The server is running at the 80 port");
 });

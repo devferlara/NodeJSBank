@@ -20,16 +20,16 @@ var api = express();
 var _connect_database_error = 'We\'re having issues with the database, please try again';
 var _user_is_not_logged_in = 'You\'re not logged in';
 
-var _login_email_required = 'Email is required';
-var _login_password_required = 'Password is required';
-var _login_user_not_exists = 'User doesn\'t not exists';
-var _login_user_password_incorrect = 'Password incorrect';
+var _login_email_required = 'A valid email is required';
+var _login_password_required = 'The password is required';
+var _login_user_not_exists = 'User doesn\'t exists';
+var _login_user_password_incorrect = 'User and password doesn\'t match';
 
 var _signup_first_name_required = 'First name is required';
 var _signup_last_name_required = 'Last name is required';
 var _signup_email_invalid = 'A valid email is required';
 var _signup_password_required = 'Password is required';
-var _signup_password_creation_error = 'Has been an error in the process, please try again.';
+var _signup_password_creation_error = 'An error has occurred, please try again.';
 var _signup_email_already_exists = 'Email already exists';
 
 var _accestoken_token_required = 'Public token is required';
