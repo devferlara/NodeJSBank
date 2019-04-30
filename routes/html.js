@@ -10,8 +10,6 @@ const PLAID_PUBLIC_KEY = '5049c988e7104f6947fa3f78c5760f';
 var PLAID_PRODUCTS = 'transactions';
 const PLAID_ENV = 'sandbox';
 
-
-
 /*
 * Plaid client
 */
@@ -24,10 +22,14 @@ var client = new plaid.Client(
 );
 
 
+
+
+
 /*-------------------------------------------------------------------------------------
 	Index 																			
 --------------------------------------------------------------------------------------*/
 api.get('/', function (req, res) {
+
 	if (req.session.user) {
 		//Let's check if the logged in user have accounts
 		//In order to show the add account button or the statistics view
@@ -37,9 +39,6 @@ api.get('/', function (req, res) {
 				req.session.user.id,
 			])
 			.then(data => {
-
-				console.log(data);
-
 				res.render('index', {
 					username: req.session.user.username,
 					PLAID_PUBLIC_KEY: PLAID_PUBLIC_KEY,
@@ -47,15 +46,12 @@ api.get('/', function (req, res) {
 					PLAID_PRODUCTS: PLAID_PRODUCTS,
 					accounts: data
 				});
-
-				//return getTransactions(data);
 			})
 			.catch(error => {
-				console.log(error);
 				var defaultError = "We're having issues with the database, please try again";
 				res.render('index', {
 					username: req.session.user.username,
-					status: "error"
+					status: defaultError
 				});
 			});
 
@@ -63,12 +59,17 @@ api.get('/', function (req, res) {
 		res.redirect('/login');
 	}
 });
-
-
 /*-------------------------------------------------------------------------------------
 	End of Index 																			
 --------------------------------------------------------------------------------------*/
 
+
+
+
+
+/*-------------------------------------------------------------------------------------
+	User signup 																			
+--------------------------------------------------------------------------------------*/
 api.get('/signup', function (req, res) {
 	if (req.session.user) {
 		res.redirect('/');
@@ -76,13 +77,28 @@ api.get('/signup', function (req, res) {
 		res.render('signup');
 	}
 });
+/*-------------------------------------------------------------------------------------
+	End of user signup 																			
+--------------------------------------------------------------------------------------*/
 
+
+
+
+
+/*-------------------------------------------------------------------------------------
+	User signout 																			
+--------------------------------------------------------------------------------------*/
 api.get('/signout', function (req, res) {
-
 	req.session.destroy();
 	res.redirect('/login');
-
 });
+/*-------------------------------------------------------------------------------------
+	Enf of signout 																			
+--------------------------------------------------------------------------------------*/
+
+
+
+
 
 /*-------------------------------------------------------------------------------------
 	Login 																			
@@ -102,16 +118,9 @@ api.get('/login', function (req, res) {
 
 
 
-
-
-
 /*-------------------------------------------------------------------------------------
 	Bank Accounts 																						
 --------------------------------------------------------------------------------------*/
-/*
-*
-*/
-
 api.get('/accounts', function (req, res) {
 	if (req.session.user) {
 		res.render('accounts', {
@@ -122,11 +131,8 @@ api.get('/accounts', function (req, res) {
 		res.redirect('/login');
 	}
 });
-
-
-
 /*-------------------------------------------------------------------------------------
-	End of Bank 		 																		
+	End of Bank accounts	 																		
 --------------------------------------------------------------------------------------*/
 
 module.exports = api;

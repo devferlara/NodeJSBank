@@ -69,6 +69,13 @@
 		width: 190px;
 	}
 
+	.rows2 {
+		left: 15%;
+		position: absolute;
+		height: 22px;
+		width: 70%;
+	}
+
 	.row1 {
 		top: 10%;
 	}
@@ -79,6 +86,26 @@
 
 	.row3 {
 		top: 30%;
+	}
+
+	.row4 {
+		top: 30%;
+	}
+
+	.row5 {
+		top: 40%;
+	}
+
+	.row6 {
+		top: 50%;
+	}
+
+	.row7 {
+		top: 60%;
+	}
+
+	.row8 {
+		top: 70%;
 	}
 
 	.shadow_title {
@@ -92,19 +119,27 @@
 				<h1>Overview</h1>
 			</div>
 			<div class="col-8  text-right">
-				<div class="form-group mb-3" style="display: inline-block;">
-					<div class="input-daterange input-group" id="datepicker">
-						<input type="text" class="input-sm form-control" name="start" placeholder="Start" />
-						<span class="input-group-addon"></span>
-						<input type="text" class="input-sm form-control" name="end" placeholder="End" />
-					</div>
-				</div>
 				<button class="connect btn btn-primary btn-lg mb-1">
 					Add account
 				</button>
 			</div>
+
+			<% if (accounts.length != 0) { %>
+			<div class="col-12">
+				<div class="form-group mb-3" style="display: inline-block;">
+					<div class="input-daterange input-group">
+						<input type="text" class="input-sm form-control" name="start" id="start" placeholder="Start" />
+						<span class="input-group-addon"></span>
+						<input type="text" class="input-sm form-control" name="end" id="end" placeholder="End" />
+						<button id="filter" class="btn btn-primary" style="margin-left: 10px;">
+							Filter
+						</button>
+					</div>
+				</div>
+			</div>
+			<% } %>
 		</div>
-		
+
 		<br>
 
 		<div class="row" id="data">
@@ -141,6 +176,11 @@
 					</div>
 					<div class="col-lg-6 mb-5">
 						<div class="chart-container">
+							<div class="anim rows2 row4"></div>
+							<div class="anim rows2 row5"></div>
+							<div class="anim rows2 row6"></div>
+							<div class="anim rows2 row7"></div>
+							<div class="anim rows2 row8"></div>
 						</div>
 					</div>
 				</div>
@@ -157,176 +197,19 @@
 <script type="text/javascript">
 
 	jQuery(document).ready(function ($) {
-		console.log(Cookies.get('toke_user'));
-		axios({
-			method: 'post',
-			url: '/api/accounts_data',
-			headers: { 'Authorization': 'Bearer ' + Cookies.get('toke_user') }
-		}).then((response) => {
 
-			var data = response.data.data;
+		if ($("#start").length) {
+			var startDate = moment().subtract(1, 'months').startOf('month').format('YYYY-MM-DD');
+			var endDate = moment().subtract(1, 'months').endOf('month').format('YYYY-MM-DD');
+			$("#start").val(startDate);
+			$("#end").val(endDate);
+			getData();
+		}
 
-			console.log(data);
-
-			$(".placeholders").remove();
-
-			var colorArray = ['#F8B195', '#F67280', '#C06C84', '#6C5B7B', '#355C7D', '#D4E1E8', '#FFF9D2', '#FF6F61', '#4799FC', '#3B71B2'];
-
-			data.forEach(function (item) {
-				$("#data").append(`
-					<div class="col-md-12" style="margin-top:60px;">
-					<div class="row">
-					<div class="col-lg-12">
-					<h3>${item.name} - ${response.data.month}</h3>
-					</div>
-					<div class="col-lg-12" style="height: 30px;"></div>
-					<div class="col-lg-6 mb-5">
-					<div class="chart-container" style="height: 400px;">
-					<canvas id="pieChart_${item.id}"></canvas>
-					</div>
-					</div>
-					<div class="col-lg-6 mb-5">
-					<h6 class="mb-4">${item.name} - Historical ${response.data.month}</h6>
-					<div class="chart-container">
-					<canvas id="salesChartNoShadow_${item.id}"></canvas>
-					</div>
-					</div>
-					<div class="col-lg-12"><hr /></div>
-					</div>
-					</div>`);
-
-
-				var pie_categories = [];
-				var pie_values = [];
-
-				var accountsObject = {};
-				var netWorth = [];
-				var line_accounts = [];
-				var line_values = [];
-
-				for (var a in item.accounts) {
-					accountsObject[item.accounts[a]["account_id"]] = { "name": item.accounts[a]["name"], "net_worth": 0 };
-					line_accounts.push(item.accounts[a]["name"]);
-					line_values.push(item.accounts[a]["balances"]["current"]);
-				}
-
-				for (var k in item.transactions) {
-					var sum = 0;
-					item.transactions[k].forEach(function (res) {
-						accountsObject[res["account_id"]]["net_worth"] = accountsObject[res["account_id"]]["net_worth"] + res["amount"];
-						sum += res["amount"];
-					});
-					pie_categories.push(k);
-					pie_values.push(sum);
-				}
-
-				console.log(accountsObject);
-				for (var l in accountsObject) {
-					netWorth.push(accountsObject[l].net_worth);
-				}
-
-				var pieChart = document.getElementById("pieChart_" + item.id);
-				var myChart = new Chart(pieChart, {
-					type: "pie",
-					data: {
-						labels: pie_categories,
-						datasets: [
-						{
-							backgroundColor: colorArray,
-							label: "",
-							data: pie_values
-						}
-						]
-					},
-					draw: function () { },
-					options: {
-						plugins: {
-							datalabels: {
-								display: false
-							}
-						},
-						responsive: true,
-						maintainAspectRatio: false,
-						title: {
-							display: false
-						},
-						layout: {
-							padding: {
-								bottom: 20
-							}
-						},
-						legend: {
-							position: "right",
-							labels: {
-								usePointStyle: true,
-								fontSize: 12
-							}
-						}
-					}
-				});
-
-				var salesChartNoShadow = document
-				.getElementById("salesChartNoShadow_" + item.id)
-				.getContext("2d");
-				var myChart = new Chart(salesChartNoShadow, {
-					type: "line",
-					options: {
-						plugins: {
-							datalabels: {
-								display: false
-							}
-						},
-						responsive: true,
-						maintainAspectRatio: false,
-						scales: {
-							yAxes: [
-							{
-								gridLines: {
-									display: true,
-									lineWidth: 1,
-									color: "rgba(0,0,0,0.1)",
-									drawBorder: false
-								}
-							}
-							],
-							xAxes: [
-							{
-								gridLines: {
-									display: false
-								}
-							}
-							]
-						},
-						legend: {
-							display: false
-						}
-					},
-					data: {
-						labels: line_accounts,
-						datasets: [
-						{
-							label: "",
-							data: netWorth,
-							borderColor: "#09f",
-							pointBackgroundColor: "#09f",
-							pointBorderColor: "#09f",
-							pointHoverBackgroundColor: "#09f",
-							pointHoverBorderColor: "#09f",
-							pointRadius: 6,
-							pointBorderWidth: 2,
-							pointHoverRadius: 8,
-							fill: false
-						}
-						]
-					}
-				});
-
-			});
-
-		}).catch((error) => {
-
-			console.log(error);
-
+		$("#filter").on("click", function (e) {
+			$(".placeholders").show();
+			$(".dataAdded").remove();
+			getData();
 		});
 
 		var products = 'transactions'.split(',');
@@ -349,13 +232,13 @@
 						data: {
 							public_token: public_token
 						},
-						headers: { 'Authorization': 'Bearer ' + Cookies.get('toke_user') }
+						headers: { 'Authorization': 'Bearer ' + Cookies.get('token_user') }
 					}).then((response) => {
 
 						var data = response.data;
 
 						$('html').loading({
-							message: 'Account added succesfully',
+							message: 'Account added successfully',
 						});
 						setTimeout(function (e) {
 							document.location.reload();
@@ -375,6 +258,212 @@
 			}).open();
 
 		});
+
+		function getData() {
+
+			var start = $("#start").val();
+			var end = $("#end").val();
+
+			axios({
+				method: 'post',
+				url: '/api/accounts_data',
+				data: {
+					start: start,
+					end: end
+				},
+				headers: { 'Authorization': 'Bearer ' + Cookies.get('token_user') }
+			}).then((response) => {
+
+				var data = response.data.data;
+
+				console.log(data);
+
+				$(".placeholders").hide();
+
+				var colorArray = ['#F8B195', '#F67280', '#C06C84', '#6C5B7B', '#355C7D', '#D4E1E8', '#FFF9D2', '#FF6F61', '#4799FC', '#3B71B2'];
+
+				data.forEach(function (item) {
+
+					if (!isEmpty(item.transactions)) {
+
+						$("#data").append(`
+						<div class="col-md-12 dataAdded" style="margin-top:60px;">
+						<div class="row">
+						<div class="col-lg-12">
+						<h3>${item.name} - ${response.data.month}</h3>
+						</div>
+						<div class="col-lg-12" style="height: 30px;"></div>
+						<div class="col-lg-6 mb-5">
+						<div class="chart-container" style="height: 400px;">
+						<canvas id="pieChart_${item.id}"></canvas>
+						</div>
+						</div>
+						<div class="col-lg-6 mb-5">
+						<h6 class="mb-4">${item.name} - Historical ${response.data.month}</h6>
+						<div class="chart-container">
+						<canvas id="salesChartNoShadow_${item.id}"></canvas>
+						</div>
+						</div>
+						<div class="col-lg-12"><hr /></div>
+						</div>
+						</div>`);
+
+						var pie_categories = [];
+						var pie_values = [];
+
+						var accountsObject = {};
+						var netWorth = [];
+						var line_accounts = [];
+						var line_values = [];
+
+						for (var a in item.accounts) {
+							accountsObject[item.accounts[a]["account_id"]] = { "name": item.accounts[a]["name"], "net_worth": 0 };
+							line_accounts.push(item.accounts[a]["name"]);
+							line_values.push(item.accounts[a]["balances"]["current"]);
+						}
+
+						for (var k in item.transactions) {
+							var sum = 0;
+							item.transactions[k].forEach(function (res) {
+								accountsObject[res["account_id"]]["net_worth"] = accountsObject[res["account_id"]]["net_worth"] + res["amount"];
+								sum += res["amount"];
+							});
+							pie_categories.push(k);
+							pie_values.push(sum);
+						}
+
+						for (var l in accountsObject) {
+							netWorth.push(accountsObject[l].net_worth);
+						}
+
+						var pieChart = document.getElementById("pieChart_" + item.id);
+						var myChart = new Chart(pieChart, {
+							type: "pie",
+							data: {
+								labels: pie_categories,
+								datasets: [
+									{
+										backgroundColor: colorArray,
+										label: "",
+										data: pie_values
+									}
+								]
+							},
+							draw: function () { },
+							options: {
+								plugins: {
+									datalabels: {
+										display: false
+									}
+								},
+								responsive: true,
+								maintainAspectRatio: false,
+								title: {
+									display: false
+								},
+								layout: {
+									padding: {
+										bottom: 20
+									}
+								},
+								legend: {
+									position: "right",
+									labels: {
+										usePointStyle: true,
+										fontSize: 12
+									}
+								}
+							}
+						});
+
+						var salesChartNoShadow = document
+							.getElementById("salesChartNoShadow_" + item.id)
+							.getContext("2d");
+						var myChart = new Chart(salesChartNoShadow, {
+							type: "line",
+							options: {
+								plugins: {
+									datalabels: {
+										display: false
+									}
+								},
+								responsive: true,
+								maintainAspectRatio: false,
+								scales: {
+									yAxes: [
+										{
+											gridLines: {
+												display: true,
+												lineWidth: 1,
+												color: "rgba(0,0,0,0.1)",
+												drawBorder: false
+											}
+										}
+									],
+									xAxes: [
+										{
+											gridLines: {
+												display: false
+											}
+										}
+									]
+								},
+								legend: {
+									display: false
+								}
+							},
+							data: {
+								labels: line_accounts,
+								datasets: [
+									{
+										label: "",
+										data: netWorth,
+										borderColor: "#09f",
+										pointBackgroundColor: "#09f",
+										pointBorderColor: "#09f",
+										pointHoverBackgroundColor: "#09f",
+										pointHoverBorderColor: "#09f",
+										pointRadius: 6,
+										pointBorderWidth: 2,
+										pointHoverRadius: 8,
+										fill: false
+									}
+								]
+							}
+						});
+
+					} else {
+
+						$("#data").append(`<div class="col-12 card_accounts dataAdded">
+							<div class="card d-flex flex-row mb-3 pad8">
+								<div class="pl-2 d-flex flex-grow-1 min-width-zero">
+									<div class="card-body align-self-center d-flex flex-column flex-lg-row justify-content-between min-width-zero align-items-lg-center">
+										<p class="list-item-heading mb-1 truncate">${item.name} doesn't have any transactions for this period.</p>
+									</div>
+								</div>
+							</div>
+						</div>`)
+
+					}
+
+				});
+
+			}).catch((error) => {
+
+				console.log(error);
+
+			});
+		}
+
+		function isEmpty(obj) {
+			for (var prop in obj) {
+				if (obj.hasOwnProperty(prop)) {
+					return false;
+				}
+			}
+
+			return JSON.stringify(obj) === JSON.stringify({});
+		}
 
 	})
 </script>

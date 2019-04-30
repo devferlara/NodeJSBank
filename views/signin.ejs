@@ -13,7 +13,8 @@
 	<link rel="stylesheet" href="../static/assets/css/bootstrap-float-label.min.css" />
 	<link rel="stylesheet" href="../static/assets/css/main.css" />
 	<link rel="stylesheet" href="../static/assets/css/noty.css" />
-	
+	<link rel="stylesheet" href="../static/assets/css/loading.css" />
+
 </head>
 
 <body class="background show-spinner">
@@ -38,7 +39,7 @@
 								<span class="logo-single"></span>
 							</a>
 							<h6 class="mb-4">Login</h6>
-							
+
 							<label class="form-group has-float-label mb-4">
 								<input class="form-control" id="email" />
 								<span>Email</span>
@@ -49,10 +50,10 @@
 								<span>Password</span>
 							</label>
 							<div class="d-flex justify-content-between align-items-center">
-								<a href="signup">Register?</a>
-								<button class="btn btn-primary btn-lg btn-shadow" type="submit" id="Login">Enter</button>
+								<a href="signup">I don't have an account already</a>
+								<button class="btn btn-primary btn-lg btn-shadow" type="submit" id="Login">Login</button>
 							</div>
-							
+
 						</div>
 					</div>
 				</div>
@@ -64,6 +65,7 @@
 	<script src="../static/assets/js/dore.script.js"></script>
 	<script src="../static/assets/js/scripts.js"></script>
 	<script src="../static/assets/js/noti.js"></script>
+	<script src="../static/assets/js/loading.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
 </body>
 
@@ -72,48 +74,47 @@
 
 
 <script type="text/javascript">
-	jQuery(document).ready(function($){
+	jQuery(document).ready(function ($) {
 
-
-		$("#password").on("keydown", function(e){
-
+		$("#password").on("keydown", function (e) {
 			if (e.keyCode == 13) {
 				$("#Login").trigger("click");
 			}
-
 		});
 
-
-
-		$("#Login").on("click", function(e){
+		$("#Login").on("click", function (e) {
 
 			var email = $("#email").val();
 			var password = $("#password").val();
 
 			if (email.length == '' || password.length == '') {
-				noty({text: 'Todos los cambios son obligatorios', timeout: 2000, theme: 'relax', type: 'error'});
+				noty({ text: 'All fields are required', timeout: 2000, theme: 'relax', type: 'error' });
 				return false;
 			}
-
 
 			function validateEmail(email) {
 				var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 				return re.test(String(email).toLowerCase());
 			}
+
 			if (!validateEmail(email)) {
-				noty({text: email + ' No es un email', timeout: 2000, theme: 'relax', type: 'error'});
+				noty({ text: email + ' is not a valid email', timeout: 2000, theme: 'relax', type: 'error' });
+				return false;
 			}
 
-			$.post( "/api/login", { email: email, password:  password})
-			.done(function(data) {
-				var toke_user = (data.token);
-				Cookies.set('toke_user', toke_user);
-				window.location.replace("/");
-			})
-			.fail(function(data){
-				var error_data = (data.responseJSON.error);
-				noty({text: ''+error_data+'', timeout: 2000, theme: 'relax', type: 'error'});	
-			})
+			$('html').loading({ stoppable: false });
+
+			$.post("/api/login", { email: email, password: password })
+				.done(function (data) {
+					var token_user = (data.token);
+					Cookies.set('token_user', token_user);
+					window.location.replace("/");
+				})
+				.fail(function (data) {
+					$('html').loading('stop');
+					var error_data = (data.responseJSON.error);
+					noty({ text: error_data, timeout: 2000, theme: 'relax', type: 'error' });
+				})
 
 		});
 	})

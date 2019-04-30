@@ -3243,7 +3243,8 @@ $.dore = function (element, options) {
         templates: {
           leftArrow: '<i class="simple-icon-arrow-left"></i>',
           rightArrow: '<i class="simple-icon-arrow-right"></i>'
-        }
+        },
+        format: 'yyyy-mm-dd',
       });
 
       $(".input-group.date").datepicker({

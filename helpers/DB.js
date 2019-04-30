@@ -6,7 +6,7 @@ const mysql = require('mysql');
 * All queries are protected against SQL Injections
 * @param {string} query -> Main SQL with placeholders "?"
 * @param {[Object]} fields -> Data that will be sanitized into placeholders
-* @return promise with result
+* @return promise with query result
 */
 class DB {
 

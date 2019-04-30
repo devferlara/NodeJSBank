@@ -33,8 +33,7 @@ app.use(
 			resave: false,
 			store: sessionStore,
 			saveUninitialized: true,
-			maxAge: Date.now() + 1800,
-			cookie: { secure: false },
+			cookie  : { secure: false, maxAge  : new Date(Date.now() + (1800000)) }
 		}
 	)
 );
