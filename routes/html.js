@@ -10,9 +10,10 @@ const PLAID_PUBLIC_KEY = '5049c988e7104f6947fa3f78c5760f';
 var PLAID_PRODUCTS = 'transactions';
 const PLAID_ENV = 'sandbox';
 
-/*
-* Plaid client
-*/
+
+var _connect_database_error = 'We\'re having issues with the database, please try again';
+
+// Plaid client
 var client = new plaid.Client(
 	PLAID_CLIENT_ID,
 	PLAID_SECRET,
@@ -20,9 +21,6 @@ var client = new plaid.Client(
 	plaid.environments[PLAID_ENV],
 	{ version: '2018-05-22' }
 );
-
-
-
 
 
 /*-------------------------------------------------------------------------------------
@@ -39,6 +37,8 @@ api.get('/', function (req, res) {
 				req.session.user.id,
 			])
 			.then(data => {
+
+				//All PLAID vars are for allow connect Plaid API in the website
 				res.render('index', {
 					username: req.session.user.username,
 					PLAID_PUBLIC_KEY: PLAID_PUBLIC_KEY,
@@ -48,10 +48,9 @@ api.get('/', function (req, res) {
 				});
 			})
 			.catch(error => {
-				var defaultError = "We're having issues with the database, please try again";
 				res.render('index', {
 					username: req.session.user.username,
-					status: defaultError
+					status: _connect_database_error
 				});
 			});
 

@@ -37,6 +37,9 @@ var _accestoken_plaid_error = 'We are having issues to connect to the Plaid API'
 
 var _remove_account_id_required = 'The account id is required';
 
+var _accountsdata_start_required = 'Start date is required';
+var _accountsdata_end_required = 'End date is required';
+
 // Plaid client
 var client = new plaid.Client(
 	PLAID_CLIENT_ID,
@@ -240,7 +243,7 @@ api.post('/get_access_token', jwt(secret), (req, res) => {
 --------------------------------------------------------------------------------------*/
 /*
 * API to remove a user's account
-* @param {string} account id
+* @param {string} account -> Account id to delete from database
 * @return [error] only if has error. HTTPCode 200 if OK / HTTPCode 400 if has errors
 */
 api.post('/remove_account', jwt(secret), (req, res) => {
@@ -249,6 +252,7 @@ api.post('/remove_account', jwt(secret), (req, res) => {
 
 		var params = req.body;
 
+		//Validation for required data
 		if (!params.account) { res.status(400).send({ error: _remove_account_id_required }); }
 
 		DB.runQuery(
@@ -279,72 +283,107 @@ api.post('/remove_account', jwt(secret), (req, res) => {
 /*-------------------------------------------------------------------------------------
 	Get account items / institutions / transactions / accounts 																		
 --------------------------------------------------------------------------------------*/
+/*
+* API to Get accounts, items and transactions of an user account from Plaid API
+* @param {string} start -> Initial date in YYY-mm-dd format
+* @param {string} end -> End date in YYY-mm-dd format
+* @return [error] only if has error. HTTPCode 200 if OK / HTTPCode 400 if has errors
+*/
 api.post('/accounts_data', jwt(secret), (req, res) => {
 
 	if (req.user.loggued) {
 
 		var params = req.body;
 
-		DB.runQuery(
-			'SELECT ID, ITEM_ID, ACCESS_TOKEN, CREATED_AT FROM USER_ACCOUNTS WHERE USER_ID = ?',
-			[
-				req.user.id,
-			])
+		//Validation for required data
+		if (!params.start) { res.status(400).send({ error: _accountsdata_start_required }); }
+		if (!params.end) { res.status(400).send({ error: _accountsdata_end_required }); }
+
+		//We get all accounts of the current user
+		DB.runQuery('SELECT ID, ITEM_ID, ACCESS_TOKEN, CREATED_AT FROM USER_ACCOUNTS WHERE USER_ID = ?', [req.user.id])
 			.then(data => {
+
+				//We get transactions of the user bank accounts
 				return getTransactions(data, params.start, params.end);
 			})
 			.then(result => {
 
+				//This array stores all data ordered and grouped to be sent to the view
 				var array = [];
-				var grouped = [];
 
+				//We loop through bank accounts to order any transaction 
 				result.forEach(function (data) {
-					grouped = _.groupBy(data.transactionsRaw.transactions, function (item) {
+
+					//With lodash we group all transactions by category_id
+					var grouped = _.groupBy(data.transactionsRaw.transactions, function (item) {
 						return item.category;
 					});
+
+					//We pushes all account information and the grouped transactions by category_id to the data array
 					array.push({
 						name: data.bank,
 						id: data.account_id,
 						accounts: data.transactionsRaw.accounts,
 						transactions: grouped
 					});
+
 				});
 
 				return array;
 
 			})
 			.then(result => {
+				//Month variable is the month name of the current query
 				res.status(200).send({
 					data: result,
 					month: moment(params.start).format('MMMM YYYY')
 				});
 			})
 			.catch(error => {
-				var defaultError = "We're having issues with the database, please try again";
 				res.status(400).send({
 					username: req.session.user.username,
-					status: "error"
+					error: _connect_database_error
 				});
 			});
+
+	} else {
+		res.status(400).send({ "error": _user_is_not_logged_in });
 	}
 
 });
 
+/*
+* Async function to get all transactions, accounts and institution information of an account
+* @param [data] -> Database result of user the accounts as array 
+* @param {string} start -> Initial date in YYY-mm-dd format
+* @param {string} end -> End date in YYY-mm-dd format
+* @return [{}] -> Returns an array of objects with: Accounts, Transactions, Items.
+*/
 async function getTransactions(array, start, end) {
 
 	var data = [];
+
+	//We loop the array waiting for the results before iterate next object
 	for (const item of array) {
+
+		//Promise for return data asynchronously
 		let transactions = await new Promise((resolve, reject) => {
 
+			//We first get general information about the account
 			client.getItem(item["ACCESS_TOKEN"], function (error, itemResponse) {
+
 				if (error != null) {
 					reject(error);
 				}
+
+				//Here we get the institution name
 				client.getInstitutionById(itemResponse.item.institution_id, function (err, instRes) {
+
 					if (err != null) {
 						reject(error);
 					} else {
 
+						//We get all the transactions and accounts of the user bank account
 						client.getTransactions(item["ACCESS_TOKEN"], start, end, {
 							count: 250,
 							offset: 0,
@@ -353,6 +392,7 @@ async function getTransactions(array, start, end) {
 								reject(error);
 							} else {
 
+								//And finally return all data in an object
 								resolve({
 									bank: instRes.institution.name,
 									account_id: item["ID"],
@@ -362,11 +402,14 @@ async function getTransactions(array, start, end) {
 						});
 
 					}
+
 				});
+
 			});
 
 		});
 
+		//We push to data array when the promise returns the information
 		data.push(transactions);
 
 	}
@@ -382,60 +425,84 @@ async function getTransactions(array, start, end) {
 
 
 /*-------------------------------------------------------------------------------------
-	Get account and institutions																		
+	Get accounts and institutions																		
 --------------------------------------------------------------------------------------*/
+/*
+* Rest to get all accounts of the user logged
+* @return [{}] -> Returns an array of objects with: Bank accounts and the bank names
+*/
 api.post('/accounts', jwt(secret), (req, res) => {
 
 	if (req.user.loggued) {
 
-		DB.runQuery(
-			'SELECT ID, ITEM_ID, ACCESS_TOKEN, CREATED_AT FROM USER_ACCOUNTS WHERE USER_ID = ?',
-			[
-				req.user.id,
-			])
+		//We get all bank account of an user
+		DB.runQuery('SELECT ID, ITEM_ID, ACCESS_TOKEN, CREATED_AT FROM USER_ACCOUNTS WHERE USER_ID = ?', [req.user.id])
 			.then(data => {
+				//We get the bank info with the following function
 				return processAccounts(data);
 			})
 			.then(data => {
-				res.status(200).send({
-					data: data
-				});
+				res.status(200).send({ data: data });
 			})
 			.catch(error => {
-				var defaultError = "We're having issues with the database, please try again";
 				res.status(400).send({
-					status: "error"
+					status: _connect_database_error
 				});
 			});
 
+	} else {
+		res.status(400).send({ "error": _user_is_not_logged_in });
 	}
 
 });
 
+/*
+* Async function to get the names of the bank accounts
+* @param [array] -> Database result of the user bank accounts
+* @return [{}] -> Returns an array of objects with: bank accounts an their names
+*/
 async function processAccounts(array) {
+
 	var data = [];
+
+	//We loop the array waiting for the results before iterate next object
 	for (const item of array) {
+
+		//Promise for return data asynchronously
 		let account = await new Promise((resolve, reject) => {
+
+			//We first get general information about the account
 			client.getItem(item["ACCESS_TOKEN"], function (error, itemResponse) {
 				if (error != null) {
 					reject(error);
 				}
+
+				//We get all the transactions and accounts of the user bank account
 				client.getInstitutionById(itemResponse.item.institution_id, function (err, instRes) {
 					if (err != null) {
+
 						reject(error);
+
 					} else {
-						var data = {
+
+						//And finally return all data in an object
+						resolve({
 							bank: instRes.institution.name,
 							created: new Date(item["CREATED_AT"]).toLocaleString(),
 							account_id: item["ID"]
-						}
-						resolve(data);
+						});
+
 					}
 				});
 			});
+
 		});
+
+		//We push to data array when the promise returns the information
 		data.push(account);
+
 	}
+
 	return data;
 }
 /*-------------------------------------------------------------------------------------
