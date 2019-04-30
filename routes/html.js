@@ -28,7 +28,6 @@ var client = new plaid.Client(
 --------------------------------------------------------------------------------------*/
 api.get('/', function (req, res) {
 
-	console.log("Slashes");
 	if (req.session.user) {
 		//Let's check if the logged in user have accounts
 		//In order to show the add account button or the statistics view

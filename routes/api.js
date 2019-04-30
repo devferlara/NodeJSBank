@@ -22,7 +22,7 @@ var _user_is_not_logged_in = 'You\'re not logged in';
 
 var _login_email_required = 'Email is required';
 var _login_password_required = 'Password is required';
-var _login_user_not_exists = 'User does not exists';
+var _login_user_not_exists = 'User doesn\'t not exists';
 var _login_user_password_incorrect = 'Password incorrect';
 
 var _signup_first_name_required = 'First name is required';
@@ -72,7 +72,7 @@ api.post('/login', function (req, res) {
 	if (!params.password) { res.status(400).send({ error: _login_password_required }); }
 
 	//Check if the user exists in database
-	DB.runQuery('SELECT ID, FIRST_NAME, LAST_NAME, EMAIL, PASSWORD FROM USERS WHERE EMAIL = ?', [params.email.toUpperCase()])
+	DB.runQuery('SELECT ID, FIRST_NAME, LAST_NAME, EMAIL, PASSWORD FROM USERS WHERE EMAIL = ?', [params.email.toUpperCase()] )
 		.then(data => {
 
 			if (data.length == 0) {
@@ -153,14 +153,13 @@ api.post('/signup', function (req, res) {
 						hash
 					])
 					.then(data => {
-						res.status(200);
+						res.status(200).send();
 					})
 					.catch(error => {
+						var defaultError = _connect_database_error;
 						//1062 = Email already exists
 						if (error.errno == 1062) {
-							defaultError = _signup_email_already_exists;
-						} else {
-							defaultError = _connect_database_error;
+							var defaultError = _signup_email_already_exists;
 						}
 						res.status(400).send({ "error": defaultError });
 					});
@@ -215,7 +214,7 @@ api.post('/get_access_token', jwt(secret), (req, res) => {
 						tokenResponse.access_token
 					])
 					.then(data => {
-						res.status(200);
+						res.status(200).send();
 					})
 					.catch(error => {
 						res.status(400).send({ "error": _connect_database_error });
@@ -261,7 +260,7 @@ api.post('/remove_account', jwt(secret), (req, res) => {
 				params.account,
 			])
 			.then(data => {
-				res.status(200);
+				res.status(200).send();
 			})
 			.catch(error => {
 				res.status(400).send({ "error": _connect_database_error });

@@ -2,6 +2,7 @@
 
 const mysql = require('mysql');
 var config = require('../conf');
+
 /*
 * DBQuery allows to user execute a query directly in the database
 * All queries are protected against SQL Injections
