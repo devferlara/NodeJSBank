@@ -1,6 +1,7 @@
 'use strict'
 
 const mysql = require('mysql');
+var config = require('../conf');
 /*
 * DBQuery allows to user execute a query directly in the database
 * All queries are protected against SQL Injections
@@ -13,10 +14,11 @@ class DB {
 	static runQuery(query, fields) {
 
 		var connection = mysql.createConnection({
-			host: 'adldb.cyv7jndgjtwk.us-east-2.rds.amazonaws.com',
-			user: 'root',
-			password: 'Eda241flop4r3',
-			database: 'Plaid'
+			host: config.host,
+			port: config.port,
+			user: config.user,
+			password: config.password,
+			database: config.database
 		});
 
 		return new Promise((resolve, reject) => {

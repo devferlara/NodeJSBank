@@ -5,13 +5,14 @@ var session = require('express-session');
 var helmet = require('helmet');
 var bodyParser = require('body-parser');
 var MySQLStore = require('express-mysql-session')(session);
+var config = require('./conf');
 
 var options = {
-	host: 'adldb.cyv7jndgjtwk.us-east-2.rds.amazonaws.com',
-	port: 3306,
-	user: 'root',
-	password: 'Eda241flop4r3',
-	database: 'Plaid'
+	host: config.host,
+	port: config.port,
+	user: config.user,
+	password: config.password,
+	database: config.database
 }; 
 
 var app = express();
